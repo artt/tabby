@@ -1,0 +1,19 @@
+.window {
+  padding: 1rem;
+  border-bottom: 1px solid #ccc;
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.grouped {
+  padding-left: 10px;
+}
+
+.tab-group-title {
+  color: white;
+}
+
+.tab-group .tab {
+  border-left: 3px solid;
+}
