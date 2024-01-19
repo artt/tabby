@@ -1,5 +1,4 @@
 export function getColor(colorName: string | undefined): string {
-
   return {
     grey: "#606367",
     blue: "#3871e0",
@@ -23,3 +22,12 @@ export function getColor(colorName: string | undefined): string {
 // #bd7ff8
 // #6dd4e9
 // #fca365
+
+export function cleanUrl(url: string | undefined): string | undefined {
+  if (!url) return url
+  // separate URL into two parts using ^https?:\/\/[^/]+\/ regex
+  // if there is no match, return the original URL
+  const match = url.match(/(^https?:\/\/[^/]+\/)(.*)/)
+  if (!match) return url
+  return match[1] + match[2].replace(/([a-zA-Z0-9]{10,})/g, "")
+}
