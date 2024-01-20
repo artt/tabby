@@ -7,11 +7,12 @@ type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: ch
 type OrganizedTabElement = OrganizedTabTab | OrganizedTabGroup
 
 
-function Tab({tab, className, style}: {tab: chrome.tabs.Tab, className: string, style?: React.CSSProperties}) {
+function Tab({tab, className="", style}: {tab: chrome.tabs.Tab, className?: string, style?: React.CSSProperties}) {
 
   function handleClick(event: React.MouseEvent) {
     event.stopPropagation()
     chrome.windows.update(tab.windowId!, {focused: true})
+    chrome.sidePanel.open({windowId: tab.windowId!})
     chrome.tabs.update(tab.id!, {active: true})
   }
 
@@ -21,7 +22,13 @@ function Tab({tab, className, style}: {tab: chrome.tabs.Tab, className: string, 
   }
 
   return (
-    <div className={clsx("tab", className)} style={style} onClick={handleClick}>
+    <div
+      title={tab.url}
+      className={clsx("tab", tab.active && "tab-active", className)}
+      style={style}
+      onClick={handleClick}
+    >
+      <img className="tab-favicon" src={tab.favIconUrl} alt="" />
       <div className="tab-title">{tab.title}</div>
       <div className="tab-close-icon" onClick={handleClose}>✕</div>
     </div>
@@ -56,11 +63,13 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
       {organizedTabs.map((el, i) => {
           if (el.type === "tabGroup") {
             return (
-              <div className="first-level tab-group" key={i}>
-                <div className="tab-group-title" style={{backgroundColor: getColor(el.color)}}>{el.title}</div>
+              <div className="first-level tab-group" key={i} style={{"--color": getColor(el.color)} as React.CSSProperties}>
+                <div className="tab-group-title">
+                  <span>{el.title}</span>
+                </div>
                 {el.tabs!.map((tab, j) => {
                   return (
-                    <Tab tab={tab} className="grouped" key={j} style={{borderColor: getColor(el.color)}} />
+                    <Tab tab={tab} key={j} style={{borderColor: getColor(el.color)}} />
                   )
                 })}
               </div>
