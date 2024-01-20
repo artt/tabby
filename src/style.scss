@@ -1,8 +1,41 @@
+#root, .window {
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .window {
   padding: 1rem;
   border-bottom: 1px solid #ccc;
   &:last-child {
     border-bottom: none;
+  }
+}
+
+.tab {
+  display: flex;
+  &:hover {
+    background: #eee;
+  }
+}
+
+.tab-title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tab-close-icon {
+  margin-left: auto;
+  cursor: pointer;
+  display: none;
+  opacity: 0.3;
+  font-weight: bold;
+}
+
+.tab:hover .tab-close-icon{
+  display: block;
+  &:hover {
+    opacity: 1;
   }
 }
 

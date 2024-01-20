@@ -1,9 +1,32 @@
 // import clsx from 'clsx'
+import clsx from 'clsx'
 import { getColor } from './utils'
 
 type OrganizedTabTab = chrome.tabs.Tab & {type: "tab"}
 type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: chrome.tabs.Tab[]}
 type OrganizedTabElement = OrganizedTabTab | OrganizedTabGroup
+
+
+function Tab({tab, className, style}: {tab: chrome.tabs.Tab, className: string, style?: React.CSSProperties}) {
+
+  function handleClick(event: React.MouseEvent) {
+    event.stopPropagation()
+    chrome.windows.update(tab.windowId!, {focused: true})
+    chrome.tabs.update(tab.id!, {active: true})
+  }
+
+  function handleClose(event: React.MouseEvent) {
+    event.stopPropagation()
+    chrome.tabs.remove(tab.id!)
+  }
+
+  return (
+    <div className={clsx("tab", className)} style={style} onClick={handleClick}>
+      <div className="tab-title">{tab.title}</div>
+      <div className="tab-close-icon" onClick={handleClose}>✕</div>
+    </div>
+  )
+}
 
 
 function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: chrome.tabGroups.TabGroup[]}) {
@@ -37,7 +60,7 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
                 <div className="tab-group-title" style={{backgroundColor: getColor(el.color)}}>{el.title}</div>
                 {el.tabs!.map((tab, j) => {
                   return (
-                    <div key={j} className="tab grouped" style={{borderColor: getColor(el.color)}}>{tab.title}</div>
+                    <Tab tab={tab} className="grouped" key={j} style={{borderColor: getColor(el.color)}} />
                   )
                 })}
               </div>
@@ -45,9 +68,7 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
           }
           else {
             return (
-              <div className="first-level tab" key={i}>
-                {el.title}
-              </div>
+              <Tab tab={el} className="first-level" key={i} />
             )
           }
         })
