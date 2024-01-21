@@ -18,8 +18,8 @@ async function group() {
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   })
-  console.log(allTabs)
-  console.log(tabIds)
+  console.log("allTabs:", allTabs)
+  console.log("tabIds:", tabIds)
   console.log("Making call to OpenAI...")
   const res = await openai.chat.completions.create({
     model: "gpt-4-1106-preview",
@@ -43,10 +43,11 @@ async function group() {
     ]
   })
   const newGroups = JSON.parse(res.choices[0].message.content || `{"groups": []}`)["groups"]
-  console.log("Get new groups", newGroups)
+  console.log("Get new grouping", newGroups)
   // move the tabs accordingly
   for (const group of newGroups) {
-    const tabIdsInGroup = group.tabIds.map((tabId: number) => tabIds[tabId])
+    console.log(`Moving tabs for group "${group.title}"`)
+    const tabIdsInGroup = group.tabIds.map((tabId: number) => tabIds[tabId] || (-1 * tabId)).filter((tabId: number) => tabId > 0)
     console.log(tabIdsInGroup)
     const groupId = await chrome.tabs.group({ tabIds: tabIdsInGroup })
     chrome.tabGroups.update(groupId, { title: group.title })
@@ -57,7 +58,7 @@ function App() {
 
   const [windows, setWindows] = React.useState<chrome.windows.Window[]>([])
   const [tabGroups, setTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
-  const [tabs, setTabs] = React.useState<chrome.tabs.Tab[]>([])
+  // const [tabs, setTabs] = React.useState<chrome.tabs.Tab[]>([])
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_keepWindows, setKeepWindows] = React.useState<boolean>(false)
@@ -68,7 +69,7 @@ function App() {
   function handleEvent(_name: string, _payload: object) {
     chrome.windows.getAll({populate: true}).then(res => setWindows(res))
     chrome.tabGroups.query({}).then(res => setTabGroups(res))
-    chrome.tabs.query({}).then(res => setTabs(res))
+    // chrome.tabs.query({}).then(res => setTabs(res))
   }
 
   React.useEffect(() => {
@@ -96,15 +97,15 @@ function App() {
 
   }, [])
 
-  React.useEffect(() => {
-    console.log(windows)
-  }, [windows])
-  React.useEffect(() => {
-    console.log(tabGroups)
-  }, [tabGroups])
-  React.useEffect(() => {
-    console.log(tabs)
-  }, [tabs])
+  // React.useEffect(() => {
+  //   console.log(windows)
+  // }, [windows])
+  // React.useEffect(() => {
+  //   console.log(tabGroups)
+  // }, [tabGroups])
+  // React.useEffect(() => {
+  //   console.log(tabs)
+  // }, [tabs])
 
   return (
     <>

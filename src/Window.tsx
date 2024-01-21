@@ -6,6 +6,10 @@ type OrganizedTabTab = chrome.tabs.Tab & {type: "tab"}
 type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: chrome.tabs.Tab[]}
 type OrganizedTabElement = OrganizedTabTab | OrganizedTabGroup
 
+function handleCloseGroup(event: React.MouseEvent, tabGroup: OrganizedTabGroup) {
+  event.stopPropagation()
+  tabGroup.tabs.forEach(tab => chrome.tabs.remove(tab.id!))
+}
 
 function Tab({tab, className="", style}: {tab: chrome.tabs.Tab, className?: string, style?: React.CSSProperties}) {
 
@@ -64,8 +68,9 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
           if (el.type === "tabGroup") {
             return (
               <div className="first-level tab-group" key={i} style={{"--color": getColor(el.color)} as React.CSSProperties}>
-                <div className="tab-group-title">
-                  <span>{el.title}</span>
+                <div className="tab-group-header">
+                  <div className="tab-group-title">{el.title}</div>
+                  <div className="tab-close-icon" onClick={e => handleCloseGroup(e, el)}>✕</div>
                 </div>
                 {el.tabs!.map((tab, j) => {
                   return (

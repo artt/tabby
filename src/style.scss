@@ -45,21 +45,26 @@
   font-weight: bold;
 }
 
-.tab:hover .tab-close-icon{
-  display: block;
-  &:hover {
-    opacity: 1;
+.tab:hover, .tab-group-header:hover {
+  > .tab-close-icon {
+    display: block;
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
-.tab-group-title {
+.tab-group-header {
+  display: flex;
+  align-items: center;
+  background-color: var(--color);
+  padding: 2px 10px;
+  border-top-left-radius: 4px;
   color: white;
+}
+
+.tab-group-title {
   font-weight: bold;
-  span {
-    background-color: var(--color);
-    padding: 2px 10px;
-    border-radius: 4px 4px 4px 0;
-  }
 }
 
 .tab-group {
