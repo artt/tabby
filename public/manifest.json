@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "TabGrouper",
+  "name": "Tabby",
   "version": "0.1",
   "description": "Group tabs using AI",
   "icons": {
