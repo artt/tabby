@@ -1,6 +1,4 @@
-// import clsx from 'clsx'
 import clsx from 'clsx'
-// import { getColor } from './utils'
 
 type OrganizedTabTab = chrome.tabs.Tab & {type: "tab"}
 type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: chrome.tabs.Tab[]}
@@ -74,8 +72,7 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
                 </div>
                 {el.tabs!.map((tab, j) => {
                   return (
-                    <Tab tab={tab} key={j} style={{borderColor: `var(--${el.color})`}} />
-                    // <Tab tab={tab} key={j} style={{borderColor: getColor(el.color)}} />
+                    <Tab tab={tab} key={j} style={{borderColor: `var(--color)`}} />
                   )
                 })}
               </div>
