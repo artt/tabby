@@ -92,6 +92,11 @@ function App() {
         (addedTabId, removedTabId) => handleEvent("replaced", {addedTabId, removedTabId}));
     chrome.tabs.onUpdated.addListener(
         (tabId, changeInfo, tab) => handleEvent("updated", {tabId, changeInfo, tab}));
+    chrome.tabGroups.onCreated.addListener((group) => handleEvent("groupCreated", {group}));
+    chrome.tabGroups.onMoved.addListener((group) => handleEvent("groupMoved", {group}));
+    chrome.tabGroups.onRemoved.addListener((group) => handleEvent("groupRemoved", {group}));
+    chrome.tabGroups.onUpdated.addListener((group) => handleEvent("groupUpdated", {group}));
+
 
     handleEvent("init", {})
 

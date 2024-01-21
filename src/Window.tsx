@@ -1,6 +1,6 @@
 // import clsx from 'clsx'
 import clsx from 'clsx'
-import { getColor } from './utils'
+// import { getColor } from './utils'
 
 type OrganizedTabTab = chrome.tabs.Tab & {type: "tab"}
 type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: chrome.tabs.Tab[]}
@@ -67,14 +67,15 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
       {organizedTabs.map((el, i) => {
           if (el.type === "tabGroup") {
             return (
-              <div className="first-level tab-group" key={i} style={{"--color": getColor(el.color)} as React.CSSProperties}>
+              <div className="first-level tab-group" key={i} style={{"--color": `var(--${el.color})`} as React.CSSProperties}>
                 <div className="tab-group-header">
                   <div className="tab-group-title">{el.title}</div>
                   <div className="tab-close-icon" onClick={e => handleCloseGroup(e, el)}>✕</div>
                 </div>
                 {el.tabs!.map((tab, j) => {
                   return (
-                    <Tab tab={tab} key={j} style={{borderColor: getColor(el.color)}} />
+                    <Tab tab={tab} key={j} style={{borderColor: `var(--${el.color})`}} />
+                    // <Tab tab={tab} key={j} style={{borderColor: getColor(el.color)}} />
                   )
                 })}
               </div>
