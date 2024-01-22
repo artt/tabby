@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { getFaviconUrl } from './utils'
 
 type OrganizedTabTab = chrome.tabs.Tab & {type: "tab"}
 type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: chrome.tabs.Tab[]}
@@ -30,7 +31,7 @@ function Tab({tab, className="", style}: {tab: chrome.tabs.Tab, className?: stri
       style={style}
       onClick={handleClick}
     >
-      <img className="tab-favicon" src={tab.favIconUrl} alt="" />
+      <img className="tab-favicon" src={tab.favIconUrl || getFaviconUrl(tab.url || "")} alt="" />
       <div className="tab-title">{tab.title}</div>
       <div className="tab-close-icon" onClick={handleClose}>✕</div>
     </div>

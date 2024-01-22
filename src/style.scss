@@ -1,4 +1,12 @@
 #root {
+  --controls-height: 60px;
+}
+
+// color definitions
+#root {
+  --text-color: rgba(0, 0, 0, 0.87);
+  --text-color-inverted: rgba(255, 255, 255, 0.87);
+  --background-color: #fff;
   --grey: #606367;
   --blue: #3871e0;
   --red: #c84031;
@@ -8,10 +16,11 @@
   --purple: #9648eb;
   --cyan: #357981;
   --orange: #ec9550;
-  --text-color: rgba(0, 0, 0, 0.87);
-  --text-color-inverted: rgba(255, 255, 255, 0.87);
   color: var(--text-color);
   @media (prefers-color-scheme: dark) {
+    --text-color: rgba(255, 255, 255, 0.87);
+    --text-color-inverted: rgba(0, 0, 0, 0.87);
+    --background-color: #1e1e1e;
     --grey: #d5d7db;
     --blue: #7fabf7;
     --red: #f08077;
@@ -21,14 +30,43 @@
     --purple: #bd7ff8;
     --cyan: #6dd4e9;
     --orange: #fca365;
-    --text-color: rgba(255, 255, 255, 0.87);
-    --text-color-inverted: rgba(0, 0, 0, 0.87);
+
   }
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-y: hidden;
+}
+
+#root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  height: 100vh;
+  background-color: var(--background-color);
 }
 
 #root, .window {
   width: 100%;
   box-sizing: border-box;
+}
+
+.controls-container {
+  height: var(--controls-height);
+  border-bottom: 2px solid var(--text-color);
+}
+
+.windows-container {
+  height: calc(100vh - var(--controls-height));
+  overflow-y: auto;
 }
 
 .window {
@@ -103,7 +141,7 @@
     border-left: 2px solid;
     padding-left: 4px;
     &:last-child {
-      border-bottom-left-radius: 2px;
+      border-bottom-left-radius: 4px;
     }
   }
 }

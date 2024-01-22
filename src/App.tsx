@@ -102,9 +102,9 @@ function App() {
 
   }, [])
 
-  // React.useEffect(() => {
-  //   console.log(windows)
-  // }, [windows])
+  React.useEffect(() => {
+    console.log(windows)
+  }, [windows])
   // React.useEffect(() => {
   //   console.log(tabGroups)
   // }, [tabGroups])
@@ -114,18 +114,20 @@ function App() {
 
   return (
     <>
-      <div className="controls">
+      <div className="controls-container">
         Keep windows <input type="checkbox" onClick={e => setKeepWindows((e.target as HTMLInputElement).checked)} />
         Keep existing groups <input type="checkbox" onClick={e => setKeepExistingGroups((e.target as HTMLInputElement).checked)} />
         <button onClick={group}>Group current window</button>
       </div>
-      {windows.map(window => (
-        <Window
-          key={window.id}
-          window={window}
-          tabGroups={tabGroups}
-        />
-      ))}
+      <div className="windows-container">
+        {windows.map(window => (
+          <Window
+            key={window.id}
+            window={window}
+            tabGroups={tabGroups}
+          />
+        ))}
+      </div>
     </>
   )
 }

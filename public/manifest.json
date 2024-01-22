@@ -18,6 +18,7 @@
   "permissions": [
     "tabs",
     "tabGroups",
-    "sidePanel"
+    "sidePanel",
+    "favicon"
   ]
 }
