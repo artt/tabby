@@ -10,3 +10,7 @@ export function cleanUrl(url: string | undefined): string | undefined {
 export function getFaviconUrl(url: string) {
   return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=32`;
 }
+
+export function isTabMatched(tab: chrome.tabs.Tab, searchString: string): boolean {
+  return tab.title?.toLowerCase().includes(searchString.toLowerCase()) || tab.url?.toLowerCase().includes(searchString.toLowerCase()) || false
+}

@@ -1,5 +1,8 @@
+$height-transition: 0.2s ease-in-out;
+
 #root {
   --controls-height: 60px;
+  --tab-height: 20px;
 }
 
 // color definitions
@@ -64,6 +67,7 @@ body {
 
 .controls-container {
   height: var(--controls-height);
+  flex: 0 0 auto;
   border-bottom: 2px solid var(--text-color);
 }
 
@@ -86,13 +90,15 @@ body {
 }
 
 .tab {
+  overflow-y: hidden;
   display: flex;
   align-items: center;
-  height: 20px;
+  height: var(--tab-height);
   padding: 0 10px;
   &:hover {
     background-color: rgb(from var(--text-color) r g b / 10%);
   }
+  transition: height $height-transition;
 }
 
 .tab-active {
@@ -143,6 +149,7 @@ body {
 }
 
 .tab-group {
+  overflow-y: hidden;
   margin: 4px 0 4px 10px;
   background-color: rgb(from var(--color) r g b / 10%);
   .tab {
@@ -151,5 +158,18 @@ body {
     &:last-child {
       border-bottom-left-radius: 4px;
     }
+  }
+  transition: height $height-transition;
+}
+
+.search-mode {
+  .tab {
+    height: 0;
+  }
+  .tab.focused {
+    height: var(--tab-height);
+  }
+  .tab-group:not(:has(.tab.focused)) {
+    height: 0;
   }
 }

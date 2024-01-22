@@ -66,26 +66,16 @@ async function deduplicate() {
   // TODO: needo to check if the tabs really are the same?
 }
 
-function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
-  const query = event.target.value
-  const matchedTabs: chrome.tabs.Tab[] = []
-  chrome.tabs.query({currentWindow: true}, tabs => {
-    console.log(tabs)
-    tabs.forEach(tab => {
-      if (tab.title?.includes(query) || tab.url?.includes(query)) {
-        matchedTabs.push(tab)
-      }
-    })
-    console.log(matchedTabs)
-  })
+function handleSearch(event: React.ChangeEvent<HTMLInputElement>, setSearchString: React.Dispatch<React.SetStateAction<string>>) {
+  setSearchString(event.target.value)
 }
 
-export function Controls() {
+export function Controls({searchString, setSearchString}: {searchString: string, setSearchString: React.Dispatch<React.SetStateAction<string>>}) {
   return(
     <div className="controls-container">
       <button onClick={group}>Group current window</button>
       <button onClick={deduplicate}>Deduplicate</button>
-      <input type="text" placeholder="Search" onChange={handleSearch} />
+      <input type="text" placeholder="Search" value={searchString} onChange={e => handleSearch(e, setSearchString)} />
     </div>
   )
 }

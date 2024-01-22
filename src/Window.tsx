@@ -1,13 +1,13 @@
 import clsx from 'clsx'
 import { getFaviconUrl } from './utils'
-import type { GroupData, WindowData } from './App'
+import type { GroupData, TabData, WindowData } from './App'
 
 function handleCloseGroup(event: React.MouseEvent, tabGroup: GroupData) {
   event.stopPropagation()
   tabGroup.tabs.forEach(tab => chrome.tabs.remove(tab.id!))
 }
 
-function Tab({tab, className="", style}: {tab: chrome.tabs.Tab, className?: string, style?: React.CSSProperties}) {
+function Tab({tab, className="", style}: {tab: TabData, className?: string, style?: React.CSSProperties}) {
 
   function handleClick(event: React.MouseEvent) {
     event.stopPropagation()
@@ -24,7 +24,11 @@ function Tab({tab, className="", style}: {tab: chrome.tabs.Tab, className?: stri
   return (
     <div
       title={tab.url}
-      className={clsx("tab", tab.active && "tab-active", className)}
+      className={clsx(
+        "tab",
+        tab.active && "tab-active",
+        className ?? "",
+      )}
       style={style}
       onClick={handleClick}
     >
@@ -36,7 +40,7 @@ function Tab({tab, className="", style}: {tab: chrome.tabs.Tab, className?: stri
 }
 
 
-function Window({windowData}: {windowData: WindowData}) {
+function Window({windowData, focusedTabs}: {windowData: WindowData, focusedTabs: number[]}) {
 
   return (
     <div className="window">
@@ -50,7 +54,7 @@ function Window({windowData}: {windowData: WindowData}) {
                 </div>
                 {el.tabs!.map((tab, j) => {
                   return (
-                    <Tab tab={tab} key={j} style={{borderColor: `var(--color)`}} />
+                    <Tab tab={tab} key={j} className={focusedTabs.includes(tab.id!) ? "focused" : ""} style={{borderColor: `var(--color)`}} />
                   )
                 })}
               </div>
@@ -58,7 +62,7 @@ function Window({windowData}: {windowData: WindowData}) {
           }
           else {
             return (
-              <Tab tab={el} className="first-level" key={i} />
+              <Tab tab={el} className={clsx("first-level", focusedTabs.includes(el.id!) && "focused")} key={i} />
             )
           }
         })

@@ -2,6 +2,8 @@ import React from 'react'
 import Window from './Window'
 import './style.scss'
 import { Controls } from './Controls'
+import { isTabMatched } from './utils'
+import clsx from 'clsx'
 
 export type TabData = chrome.tabs.Tab & {type: "tab"}
 export type GroupData = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: TabData[]}
@@ -13,6 +15,10 @@ function App() {
   const [tabGroups, setTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
 
   const [windowsData, setWindowsData] = React.useState<WindowData[]>([])
+  // additional properties of tabs are stored in a separate object
+  const [focusedTabs, setFocusedTabs] = React.useState<number[]>([])
+
+  const [searchString, setSearchString] = React.useState("")
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
@@ -73,6 +79,17 @@ function App() {
     }))
   }, [windows, tabGroups])
 
+  React.useEffect(() => {
+    if (searchString === "") return
+    // populate focusedTabs with tabs that match the search string
+    let newFocusedTabs: number[] = []
+    windows.forEach(window => {
+      if (!window.tabs) return
+      newFocusedTabs = newFocusedTabs.concat(window.tabs.filter(tab => isTabMatched(tab, searchString)).map(tab => tab.id!))
+    })
+    setFocusedTabs(newFocusedTabs)
+  }, [windows, searchString])
+
   // React.useEffect(() => {
   //   console.log(windowsData)
   // }, [windowsData])
@@ -86,12 +103,13 @@ function App() {
 
   return (
     <>
-      <Controls />
-      <div className="windows-container">
+      <Controls searchString={searchString} setSearchString={setSearchString}/>
+      <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
         {windowsData.map(windowData => (
           <Window
             key={windowData.id}
             windowData={windowData}
+            focusedTabs={focusedTabs}
           />
         ))}
       </div>
