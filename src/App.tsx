@@ -3,10 +3,16 @@ import Window from './Window'
 import './style.scss'
 import { Controls } from './Controls'
 
+export type TabData = chrome.tabs.Tab & {type: "tab"}
+export type GroupData = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: TabData[]}
+export type WindowData = chrome.windows.Window & {elements: (TabData | GroupData)[]}
+
 function App() {
 
   const [windows, setWindows] = React.useState<chrome.windows.Window[]>([])
   const [tabGroups, setTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
+
+  const [windowsData, setWindowsData] = React.useState<WindowData[]>([])
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
@@ -45,8 +51,32 @@ function App() {
   }, [])
 
   React.useEffect(() => {
-    console.log(windows)
-  }, [windows])
+    setWindowsData(windows.map(window => {
+      if (!window.tabs) return {...window, elements: []}
+      const elements: WindowData["elements"] = []
+      for (let i = 0; i < window.tabs.length; i ++) {
+        const tab = window.tabs[i]
+        if (tab.groupId === -1) {
+          elements.push({...tab, type: "tab"})
+        }
+        else {
+          const tabGroup = tabGroups.find(tabGroup => tabGroup.id === tab.groupId)
+          if (tabGroup) {
+            const tabsInGroup = window.tabs.filter(tab => tab.groupId === tabGroup.id).map(tab => ({...tab, type: "tab"} as TabData))
+            const tmp: GroupData = {type: "tabGroup", ...tabGroup, tabs: tabsInGroup}
+            elements.push(tmp)
+            i += tabsInGroup.length - 1
+          }
+        }
+      }
+      return {...window, elements}
+    }))
+  }, [windows, tabGroups])
+
+  // React.useEffect(() => {
+  //   console.log(windowsData)
+  // }, [windowsData])
+
   // React.useEffect(() => {
   //   console.log(tabGroups)
   // }, [tabGroups])
@@ -58,11 +88,10 @@ function App() {
     <>
       <Controls />
       <div className="windows-container">
-        {windows.map(window => (
+        {windowsData.map(windowData => (
           <Window
-            key={window.id}
-            window={window}
-            tabGroups={tabGroups}
+            key={windowData.id}
+            windowData={windowData}
           />
         ))}
       </div>
