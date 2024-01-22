@@ -1,6 +1,6 @@
 # To-do's
 
-- [ ] Add search function that would highlight matched terms
+- [ ] Highlight matched terms when searching
 - [x] Dark mode
 - [x] Deduplicate
 - [ ] Drag and drop
