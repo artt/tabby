@@ -8,3 +8,4 @@
 - [ ] View tab connections through parent ID, etc.
 - [ ] More tab info like mute status, etc.
 - [ ] Network view?
+- [ ] Click to rename group

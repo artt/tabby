@@ -65,6 +65,20 @@ async function deduplicate() {
   // TODO: report how many tabs are closed in a toast
 }
 
+function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
+  const query = event.target.value
+  const matchedTabs: chrome.tabs.Tab[] = []
+  chrome.tabs.query({currentWindow: true}, tabs => {
+    console.log(tabs)
+    tabs.forEach(tab => {
+      if (tab.title?.includes(query) || tab.url?.includes(query)) {
+        matchedTabs.push(tab)
+      }
+    })
+    console.log(matchedTabs)
+  })
+}
+
 export function Controls() {
   return(
     <div className="controls-container">
@@ -72,6 +86,7 @@ export function Controls() {
       {/* Keep existing groups <input type="checkbox" onClick={e => setKeepExistingGroups((e.target as HTMLInputElement).checked)} /> */}
       <button onClick={group}>Group current window</button>
       <button onClick={deduplicate}>Deduplicate</button>
+      <input type="text" placeholder="Search" onChange={handleSearch} />
     </div>
   )
 }

@@ -134,7 +134,7 @@ body {
   background-color: var(--color);
   padding: 2px 10px;
   border-top-left-radius: 4px;
-  color: var(--text-color-inverted);
+  color: rgb(from var(--text-color-inverted) r g b / 100%);
 }
 
 .tab-group-title {
