@@ -50,8 +50,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  height: 100vh;
   background-color: var(--background-color);
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 #root, .window {
@@ -65,8 +68,12 @@ body {
 }
 
 .windows-container {
-  height: calc(100vh - var(--controls-height));
   overflow-y: auto;
+}
+
+.footer-container {
+  height: 40px;
+  border-top: 2px solid var(--text-color);
 }
 
 .window {

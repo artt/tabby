@@ -128,6 +128,9 @@ function App() {
           />
         ))}
       </div>
+      <div className="footer-container">
+        Test
+      </div>
     </>
   )
 }
