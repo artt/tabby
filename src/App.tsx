@@ -54,6 +54,20 @@ async function group() {
   }
 }
 
+// https://github.com/Litee/prevent-duplicate-tabs-chrome-extension/blob/master/src/background.ts
+async function deduplicate() {
+  chrome.tabs.query({}, tabs => {
+    const alreadyEncounteredTabUrls = new Set()
+    tabs.forEach(tab => {
+        if (alreadyEncounteredTabUrls.has(tab.url)) {
+            chrome.tabs.remove(tab.id!);
+        }
+        alreadyEncounteredTabUrls.add(tab.url);
+    })
+  })
+  // TODO: report how many tabs are closed in a toast
+}
+
 function App() {
 
   const [windows, setWindows] = React.useState<chrome.windows.Window[]>([])
@@ -61,9 +75,9 @@ function App() {
   // const [tabs, setTabs] = React.useState<chrome.tabs.Tab[]>([])
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_keepWindows, setKeepWindows] = React.useState<boolean>(false)
+  // const [_keepWindows, setKeepWindows] = React.useState<boolean>(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_keepExistingGroups, setKeepExistingGroups] = React.useState<boolean>(false)
+  // const [_keepExistingGroups, setKeepExistingGroups] = React.useState<boolean>(false)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
@@ -97,7 +111,6 @@ function App() {
     chrome.tabGroups.onRemoved.addListener((group) => handleEvent("groupRemoved", {group}));
     chrome.tabGroups.onUpdated.addListener((group) => handleEvent("groupUpdated", {group}));
 
-
     handleEvent("init", {})
 
   }, [])
@@ -115,9 +128,10 @@ function App() {
   return (
     <>
       <div className="controls-container">
-        Keep windows <input type="checkbox" onClick={e => setKeepWindows((e.target as HTMLInputElement).checked)} />
-        Keep existing groups <input type="checkbox" onClick={e => setKeepExistingGroups((e.target as HTMLInputElement).checked)} />
+        {/* Keep windows <input type="checkbox" onClick={e => setKeepWindows((e.target as HTMLInputElement).checked)} /> */}
+        {/* Keep existing groups <input type="checkbox" onClick={e => setKeepExistingGroups((e.target as HTMLInputElement).checked)} /> */}
         <button onClick={group}>Group current window</button>
+        <button onClick={deduplicate}>Deduplicate</button>
       </div>
       <div className="windows-container">
         {windows.map(window => (

@@ -1,7 +1,8 @@
 # To-do's
 
 - [ ] Add search function that would highlight matched terms
-- [ ] Dark mode
+- [x] Dark mode
+- [x] Deduplicate
 - [ ] Drag and drop
 - [ ] Flag important tabs
 - [ ] View tab connections through parent ID, etc.
