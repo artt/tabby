@@ -27,7 +27,7 @@ async function group() {
         content: [
           `You help people manage their tabs by grouping the tabs by their topics.`,
           `You will be provided with an array of object: {title, url}.`,
-          `Each item in the array has a running ID that starts with zero associate with it.`,
+          `Each item in the array is identified by its zero-based index.`,
           `Given this array, group them into logical groups based on the content inferred from titles and URLs, not just the domain name.`,
           `The output should be a JSON object with key "groups" whose value is an array of objects with keys "title" which specifies the tab group's name, and "tabIds" which is an array of tab IDs in respective groups.`,
           `Items that don't belong to any group should be left out.`,
@@ -63,6 +63,7 @@ async function deduplicate() {
     })
   })
   // TODO: report how many tabs are closed in a toast
+  // TODO: needo to check if the tabs really are the same?
 }
 
 function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
@@ -82,8 +83,6 @@ function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
 export function Controls() {
   return(
     <div className="controls-container">
-      {/* Keep windows <input type="checkbox" onClick={e => setKeepWindows((e.target as HTMLInputElement).checked)} /> */}
-      {/* Keep existing groups <input type="checkbox" onClick={e => setKeepExistingGroups((e.target as HTMLInputElement).checked)} /> */}
       <button onClick={group}>Group current window</button>
       <button onClick={deduplicate}>Deduplicate</button>
       <input type="text" placeholder="Search" onChange={handleSearch} />

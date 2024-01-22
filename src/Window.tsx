@@ -1,11 +1,11 @@
 import clsx from 'clsx'
 import { getFaviconUrl } from './utils'
 
-type OrganizedTabTab = chrome.tabs.Tab & {type: "tab"}
-type OrganizedTabGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: chrome.tabs.Tab[]}
-type OrganizedTabElement = OrganizedTabTab | OrganizedTabGroup
+type CustomTab = chrome.tabs.Tab & {type: "tab"}
+type CustomGroup = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: CustomTab[]}
+type CustomElement = CustomTab | CustomGroup
 
-function handleCloseGroup(event: React.MouseEvent, tabGroup: OrganizedTabGroup) {
+function handleCloseGroup(event: React.MouseEvent, tabGroup: CustomGroup) {
   event.stopPropagation()
   tabGroup.tabs.forEach(tab => chrome.tabs.remove(tab.id!))
 }
@@ -44,7 +44,7 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
   if (!window.tabs) return null
 
   // change tabs so that tabs are nested if they're in a tab group
-  const organizedTabs: OrganizedTabElement[] = []
+  const organizedTabs: CustomElement[] = []
   for (let i = 0; i < window.tabs!.length; i ++) {
     const tab = window.tabs[i]
     if (tab.groupId === -1) {
@@ -53,8 +53,8 @@ function Window({window, tabGroups}: {window: chrome.windows.Window, tabGroups: 
     else {
       const tabGroup = tabGroups.find(tabGroup => tabGroup.id === tab.groupId)
       if (tabGroup) {
-        const tabsInGroup = window.tabs.filter(tab => tab.groupId === tabGroup.id).map(tab => ({...tab, type: "tab"}))
-        const tmp: OrganizedTabGroup = {type: "tabGroup", ...tabGroup, tabs: tabsInGroup}
+        const tabsInGroup = window.tabs.filter(tab => tab.groupId === tabGroup.id).map(tab => ({...tab, type: "tab"} as CustomTab))
+        const tmp: CustomGroup = {type: "tabGroup", ...tabGroup, tabs: tabsInGroup}
         organizedTabs.push(tmp)
         i += tabsInGroup.length - 1
       }

@@ -7,12 +7,6 @@ function App() {
 
   const [windows, setWindows] = React.useState<chrome.windows.Window[]>([])
   const [tabGroups, setTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
-  // const [tabs, setTabs] = React.useState<chrome.tabs.Tab[]>([])
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const [_keepWindows, setKeepWindows] = React.useState<boolean>(false)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const [_keepExistingGroups, setKeepExistingGroups] = React.useState<boolean>(false)
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
