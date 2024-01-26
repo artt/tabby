@@ -1,5 +1,13 @@
 import OpenAI from "openai"
-import { cleanUrl } from './utils'
+import { cleanUrl } from '../../utils'
+import { IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+
+// import { HamburgerIcon } from "./icons"
+import { GiHamburgerMenu } from "react-icons/gi";
+import { ImMakeGroup } from "react-icons/im";
+import { MdOutlineDeleteSweep } from "react-icons/md";
+
+import "./style.scss"
 
 async function group() {
   console.log("Grouping current window...")
@@ -66,16 +74,52 @@ async function deduplicate() {
   // TODO: needo to check if the tabs really are the same?
 }
 
-function handleSearch(event: React.ChangeEvent<HTMLInputElement>, setSearchString: React.Dispatch<React.SetStateAction<string>>) {
-  setSearchString(event.target.value)
-}
-
 export function Controls({searchString, setSearchString}: {searchString: string, setSearchString: React.Dispatch<React.SetStateAction<string>>}) {
+
+  function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
+    setSearchString(event.target.value)
+  }
+
   return(
     <div className="controls-container">
-      <button onClick={group}>Group current window</button>
-      <button onClick={deduplicate}>Deduplicate</button>
-      <input type="text" placeholder="Search" value={searchString} onChange={e => handleSearch(e, setSearchString)} />
+      <InputGroup>
+        <Input
+          id="search-bar"
+          placeholder='Search'
+          variant="flushed"
+          value={searchString}
+          onChange={handleSearch}
+          onKeyDown={e => {if (e.key === "Escape") setSearchString("")}}
+          onFocus={e => e.target.select()}
+          pl="var(--left-space)"
+          pr='2rem'
+        />
+        <InputRightElement>
+          <Menu>
+            {({ isOpen }) => (
+              // https://github.com/chakra-ui/chakra-ui/issues/4186#issuecomment-1762955580
+              <>
+              <MenuButton
+                as={IconButton}
+                aria-label='Commands'
+                icon={<GiHamburgerMenu />}
+                variant='ghost'
+                size='sm'
+                isRound
+              />
+              <MenuList display={isOpen ? "block" : "none"}>
+                <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={group}>
+                  Group tabs in current window
+                </MenuItem>
+                <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
+                  Remove duplicate tabs
+                </MenuItem>
+              </MenuList>
+              </>
+            )}
+          </Menu>
+        </InputRightElement>
+      </InputGroup>
     </div>
   )
 }

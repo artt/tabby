@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { getFaviconUrl } from './utils'
-import type { GroupData, TabData, WindowData } from './App'
+import { debugMode, type GroupData, type TabData, type WindowData } from './App'
 
 function handleCloseGroup(event: React.MouseEvent, tabGroup: GroupData) {
   event.stopPropagation()
@@ -32,7 +32,7 @@ function Tab({tab, className="", style}: {tab: TabData, className?: string, styl
       style={style}
       onClick={handleClick}
     >
-      <img className="tab-favicon" src={tab.favIconUrl || getFaviconUrl(tab.url || "")} alt="" />
+      <img className="tab-favicon" src={tab.favIconUrl || (!debugMode && getFaviconUrl(tab.url || "")) || undefined} alt="" />
       <div className="tab-title">{tab.title}</div>
       <div className="tab-close-icon" onClick={handleClose}>✕</div>
     </div>
