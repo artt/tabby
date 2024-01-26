@@ -4,7 +4,7 @@ import type { GroupData, TabData, WindowData } from './App'
 
 function handleCloseGroup(event: React.MouseEvent, tabGroup: GroupData) {
   event.stopPropagation()
-  tabGroup.tabs.forEach(tab => chrome.tabs.remove(tab.id!))
+  tabGroup.children.forEach(tab => chrome.tabs.remove(tab.id!))
 }
 
 function Tab({tab, className="", style}: {tab: TabData, className?: string, style?: React.CSSProperties}) {
@@ -44,29 +44,30 @@ function Window({windowData, focusedTabs}: {windowData: WindowData, focusedTabs:
 
   return (
     <div className="window">
-      {windowData.elements.map((el, i) => {
-          if (el.type === "tabGroup") {
-            return (
-              <div className="first-level tab-group" key={i} style={{"--color": `var(--${el.color})`} as React.CSSProperties}>
-                <div className="tab-group-header">
-                  <div className="tab-group-title">{el.title}</div>
-                  <div className="tab-close-icon" onClick={e => handleCloseGroup(e, el)}>✕</div>
-                </div>
-                {el.tabs!.map((tab, j) => {
-                  return (
-                    <Tab tab={tab} key={j} className={focusedTabs.includes(tab.id!) ? "focused" : ""} style={{borderColor: `var(--color)`}} />
-                  )
-                })}
+      {windowData.children.map((el, i) => {
+        if (el.kind === "tabGroup") {
+          const tmp = el as GroupData
+          return (
+            <div className="first-level tab-group" key={i} style={{"--color": `var(--${tmp.color})`} as React.CSSProperties}>
+              <div className="tab-group-header">
+                <div className="tab-group-title">{el.title || "​"}</div>
+                <div className="tab-close-icon" onClick={e => handleCloseGroup(e, tmp)}>✕</div>
               </div>
-            )
-          }
-          else {
-            return (
-              <Tab tab={el} className={clsx("first-level", focusedTabs.includes(el.id!) && "focused")} key={i} />
-            )
-          }
-        })
-      }
+              {tmp.children!.map((tab, j) => {
+                return (
+                  <Tab tab={tab} key={j} className={focusedTabs.includes(tab.id!) ? "focused" : ""} style={{borderColor: `var(--color)`}} />
+                )
+              })}
+            </div>
+          )
+        }
+        else {
+          const tmp = el as TabData
+          return (
+            <Tab tab={tmp} className={clsx("first-level", focusedTabs.includes(el.id!) && "focused")} key={i} />
+          )
+        }
+      })}
     </div>
   )
 

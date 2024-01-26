@@ -5,9 +5,9 @@ import { Controls } from './Controls'
 import { isTabMatched } from './utils'
 import clsx from 'clsx'
 
-export type TabData = chrome.tabs.Tab & {type: "tab"}
-export type GroupData = chrome.tabGroups.TabGroup & {type: "tabGroup", tabs: TabData[]}
-export type WindowData = chrome.windows.Window & {elements: (TabData | GroupData)[]}
+export type TabData = chrome.tabs.Tab & {kind: string, canHaveChildren: boolean}
+export type GroupData = chrome.tabGroups.TabGroup & {kind: string, children: TabData[]}
+export type WindowData = chrome.windows.Window & {kind: string, children: (TabData | GroupData)[]}
 
 function App() {
 
@@ -58,24 +58,24 @@ function App() {
 
   React.useEffect(() => {
     setWindowsData(windows.map(window => {
-      if (!window.tabs) return {...window, elements: []}
-      const elements: WindowData["elements"] = []
+      if (!window.tabs) return {...window, kind: "window", children: []}
+      const children: WindowData["children"] = []
       for (let i = 0; i < window.tabs.length; i ++) {
         const tab = window.tabs[i]
         if (tab.groupId === -1) {
-          elements.push({...tab, type: "tab"})
+          children.push({...tab, kind: "tab", canHaveChildren: false})
         }
         else {
           const tabGroup = tabGroups.find(tabGroup => tabGroup.id === tab.groupId)
           if (tabGroup) {
-            const tabsInGroup = window.tabs.filter(tab => tab.groupId === tabGroup.id).map(tab => ({...tab, type: "tab"} as TabData))
-            const tmp: GroupData = {type: "tabGroup", ...tabGroup, tabs: tabsInGroup}
-            elements.push(tmp)
+            const tabsInGroup = window.tabs.filter(tab => tab.groupId === tabGroup.id).map((tab: chrome.tabs.Tab) => ({...tab, kind: "tab", canHaveChildren: false}))
+            const tmp: GroupData = {...tabGroup, kind: "tabGroup", children: tabsInGroup}
+            children.push(tmp)
             i += tabsInGroup.length - 1
           }
         }
       }
-      return {...window, elements}
+      return {...window, kind: "window", children}
     }))
   }, [windows, tabGroups])
 
@@ -90,9 +90,9 @@ function App() {
     setFocusedTabs(newFocusedTabs)
   }, [windows, searchString])
 
-  // React.useEffect(() => {
-  //   console.log(windowsData)
-  // }, [windowsData])
+  React.useEffect(() => {
+    console.log(windowsData)
+  }, [windowsData])
 
   // React.useEffect(() => {
   //   console.log(tabGroups)
