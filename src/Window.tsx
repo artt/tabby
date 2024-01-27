@@ -23,7 +23,7 @@ function Tab({tab, className="", style}: {tab: TabData, className?: string, styl
 
   return (
     <div
-      title={tab.url}
+      title={decodeURI(tab.url!)}
       className={clsx(
         "tab",
         tab.active && "tab-active",

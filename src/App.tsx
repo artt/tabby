@@ -19,6 +19,7 @@ function App() {
 
   const [windows, setWindows] = React.useState<chrome.windows.Window[]>([])
   const [tabGroups, setTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
+  const [numTabs, setNumTabs] = React.useState<number>(0)
 
   const [windowsData, setWindowsData] = React.useState<WindowData[]>([])
   // additional properties of tabs are stored in a separate object
@@ -33,6 +34,10 @@ function App() {
     chrome.tabGroups.query({}).then(res => setTabGroups(res))
     // chrome.tabs.query({}).then(res => setTabs(res))
   }
+
+  React.useLayoutEffect(() => {
+    localStorage.removeItem("chakra-ui-color-mode")
+  }, [])
 
   React.useEffect(() => {
 
@@ -67,8 +72,9 @@ function App() {
     }
 
     document.body.addEventListener("click", handleAppClick)
-
-    return () => {document.body.removeEventListener("click", handleAppClick)}
+    return () => {
+      document.body.removeEventListener("click", handleAppClick)
+    }
 
   }, [])
 
@@ -77,9 +83,10 @@ function App() {
     const searchBar = document.getElementById("search-bar")
     if (searchBar) searchBar.focus()
   }
-
+  
   React.useEffect(() => {
     if (debugMode) return
+    setNumTabs(windows.map(window => window.tabs?.length ?? 0).reduce((a, b) => a + b, 0))
     setWindowsData(windows.map(window => {
       if (!window.tabs) return {...window, kind: "window", children: []}
       const children: WindowData["children"] = []
@@ -125,7 +132,9 @@ function App() {
   // }, [tabs])
 
   return (
-    <ChakraProvider theme={theme}>
+    <ChakraProvider
+      theme={theme}
+    >
       <Controls searchString={searchString} setSearchString={setSearchString}/>
       <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
         {windowsData.map(windowData => (
@@ -137,7 +146,7 @@ function App() {
         ))}
       </div>
       <div className="footer-container">
-        Test
+        {`Managing ${numTabs} tab${numTabs === 1 ? "" : "s"} in ${windows.length} window${windows.length === 1 ? "" : "s"}`}
       </div>
     </ChakraProvider>
   )

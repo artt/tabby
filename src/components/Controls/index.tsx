@@ -54,6 +54,7 @@ async function group() {
   const newGroups = JSON.parse(res.choices[0].message.content || `{"groups": []}`)["groups"]
   console.log("Get new grouping", newGroups)
   // move the tabs accordingly
+  // TODO: as of now, tabs that already have groups that are determined to not have any groups are not moved
   for (const group of newGroups) {
     console.log(`Moving tabs for group "${group.title}"`)
     const tabIdsInGroup = group.tabIds.map((tabId: number) => tabIds[tabId] || (-1 * tabId)).filter((tabId: number) => tabId > 0)
@@ -141,40 +142,40 @@ export function Controls({searchString, setSearchString}: {searchString: string,
           variant="flushed"
           value={searchString}
           onChange={handleSearch}
-          onKeyDown={e => {if (e.key === "Escape") setSearchString("")}}
-          onFocus={e => e.target.select()}
+          onKeyDown={e => {
+            e.stopPropagation()
+            if (e.key === "Escape") setSearchString("")
+          }}
+          onFocus={e => {
+            e.target.select()
+          }}
           pl="var(--left-space)"
           pr='2rem'
         />
         <InputRightElement>
           <Menu isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
-            {({ isOpen }) => (
-              // https://github.com/chakra-ui/chakra-ui/issues/4186#issuecomment-1762955580
-              <>
-              <MenuButton
-                as={IconButton}
-                aria-label='Commands'
-                icon={<GiHamburgerMenu />}
-                variant='ghost'
-                size='sm'
-                isRound
-              />
-              <MenuList display={isOpen ? "block" : "none"}>
-                <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={group}>
-                  Group tabs
-                </MenuItem>
-                <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>
-                  Ungroup tabs
-                </MenuItem>
-                <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
-                  Remove duplicate tabs
-                </MenuItem>
-                <MenuItem icon={<FaSortAmountDownAlt />} command='⌘S' onClick={sort}>
-                  Sort tabs by URL
-                </MenuItem>
-              </MenuList>
-              </>
-            )}
+            <MenuButton
+              as={IconButton}
+              aria-label='Commands'
+              icon={<GiHamburgerMenu />}
+              variant='ghost'
+              size='sm'
+              isRound
+            />
+            <MenuList display={isOpen ? "block" : "none"}>
+              <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={group}>
+                Group tabs
+              </MenuItem>
+              <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>
+                Ungroup tabs
+              </MenuItem>
+              <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
+                Remove duplicate tabs
+              </MenuItem>
+              <MenuItem icon={<FaSortAmountDownAlt />} command='⌘S' onClick={sort}>
+                Sort tabs by URL
+              </MenuItem>
+            </MenuList>
           </Menu>
         </InputRightElement>
       </InputGroup>

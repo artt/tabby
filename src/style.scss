@@ -10,7 +10,7 @@ $height-transition: 0.2s ease-in-out;
 #root {
   --text-color: rgba(0, 0, 0, 0.87);
   --text-color-inverted: rgba(255, 255, 255, 0.87);
-  --background-color: #fff;
+  --background-color: blue; //#fff;
   --grey: #606367;
   --blue: #3871e0;
   --red: #c84031;
@@ -20,11 +20,10 @@ $height-transition: 0.2s ease-in-out;
   --purple: #9648eb;
   --cyan: #357981;
   --orange: #ec9550;
-  color: var(--text-color);
   @media (prefers-color-scheme: dark) {
     --text-color: rgba(255, 255, 255, 0.87);
     --text-color-inverted: rgba(0, 0, 0, 0.87);
-    --background-color: #1e1e1e;
+    --background-color: red; //#1e1e1e;
     --grey: #d5d7db;
     --blue: #7fabf7;
     --red: #f08077;
@@ -34,7 +33,6 @@ $height-transition: 0.2s ease-in-out;
     --purple: #bd7ff8;
     --cyan: #6dd4e9;
     --orange: #fca365;
-
   }
 }
 
@@ -47,6 +45,11 @@ body {
   overflow-y: hidden;
 }
 
+// body {
+//   color: var(--text-color);
+//   background-color: var(--background-color);
+// }
+
 #root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -55,7 +58,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-color: var(--background-color);
+  // background-color: var(--background-color);
 
   height: 100vh;
   display: flex;
@@ -73,7 +76,7 @@ body {
 }
 
 .footer-container {
-  height: 40px;
+  height: 30px;
   padding: 0 var(--left-space);
   background-color: rgb(from var(--text-color) r g b / 10%);
   display: flex;
