@@ -2,26 +2,23 @@ import React from 'react'
 import Window from './Window'
 import './style.scss'
 import { Controls } from './components/Controls'
-import { isTabMatched } from './utils'
+import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } from './utils'
 import clsx from 'clsx'
 import { ChakraProvider } from '@chakra-ui/react'
 import theme from './theme'
 
 import { data } from './data'
-
-export type TabData = chrome.tabs.Tab & {kind: string, canHaveChildren: boolean}
-export type GroupData = chrome.tabGroups.TabGroup & {kind: string, children: TabData[]}
-export type WindowData = chrome.windows.Window & {kind: string, children: (TabData | GroupData)[]}
+import { WindowItem } from './types'
 
 export const debugMode = import.meta.env.MODE === "development"
 
 function App() {
 
-  const [windows, setWindows] = React.useState<chrome.windows.Window[]>([])
-  const [tabGroups, setTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
+  const [rawWindows, setRawWindows] = React.useState<chrome.windows.Window[]>([])
+  const [rawTabGroups, setRawTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
   const [numTabs, setNumTabs] = React.useState<number>(0)
 
-  const [windowsData, setWindowsData] = React.useState<WindowData[]>([])
+  const [windowsData, setWindowsData] = React.useState<WindowItem[]>([])
   // additional properties of tabs are stored in a separate object
   const [focusedTabs, setFocusedTabs] = React.useState<number[]>([])
 
@@ -30,8 +27,8 @@ function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
     if (debugMode) return
-    chrome.windows.getAll({populate: true}).then(res => setWindows(res))
-    chrome.tabGroups.query({}).then(res => setTabGroups(res))
+    chrome.windows.getAll({populate: true}).then(res => setRawWindows(res))
+    chrome.tabGroups.query({}).then(res => setRawTabGroups(res))
     // chrome.tabs.query({}).then(res => setTabs(res))
   }
 
@@ -43,7 +40,7 @@ function App() {
 
     if (debugMode) {
       console.log(data)
-      setWindowsData(data as WindowData[])
+      setWindowsData(data as WindowItem[])
     }
     else {
       // add event listeners
@@ -83,31 +80,37 @@ function App() {
     const searchBar = document.getElementById("search-bar")
     if (searchBar) searchBar.focus()
   }
+
   
+
+
   React.useEffect(() => {
     if (debugMode) return
-    setNumTabs(windows.map(window => window.tabs?.length ?? 0).reduce((a, b) => a + b, 0))
-    setWindowsData(windows.map(window => {
-      if (!window.tabs) return {...window, kind: "window", children: []}
-      const children: WindowData["children"] = []
+    setNumTabs(rawWindows.map(window => window.tabs?.length ?? 0).reduce((a, b) => a + b, 0))
+    setWindowsData(rawWindows.map(window => {
+      if (!window.tabs) return processWindowItem(window, [])
+
+      const children: WindowItem["children"] = []
       for (let i = 0; i < window.tabs.length; i ++) {
         const tab = window.tabs[i]
         if (tab.groupId === -1) {
-          children.push({...tab, kind: "tab", canHaveChildren: false})
+          children.push(processTabItem(tab, tab.windowId))
         }
         else {
-          const tabGroup = tabGroups.find(tabGroup => tabGroup.id === tab.groupId)
+          const tabGroup = rawTabGroups.find(tabGroup => tabGroup.id === tab.groupId)
           if (tabGroup) {
-            const tabsInGroup = window.tabs.filter(tab => tab.groupId === tabGroup.id).map((tab: chrome.tabs.Tab) => ({...tab, kind: "tab", canHaveChildren: false}))
-            const tmp: GroupData = {...tabGroup, kind: "tabGroup", children: tabsInGroup}
+            const tabsInGroup = window.tabs
+              .filter(tab => tab.groupId === tabGroup.id)
+              .map(tab => processTabItem(tab, tabGroup.id))
+            const tmp = processTabGroupItem(tabGroup, tabsInGroup)
             children.push(tmp)
             i += tabsInGroup.length - 1
           }
         }
       }
-      return {...window, kind: "window", children}
+      return processWindowItem(window, children)
     }))
-  }, [windows, tabGroups])
+  }, [rawWindows, rawTabGroups])
 
   React.useEffect(() => {
     if (searchString === "") return
@@ -124,12 +127,6 @@ function App() {
     console.log(windowsData)
   }, [windowsData])
 
-  // React.useEffect(() => {
-  //   console.log(tabGroups)
-  // }, [tabGroups])
-  // React.useEffect(() => {
-  //   console.log(tabs)
-  // }, [tabs])
 
   return (
     <ChakraProvider
@@ -146,7 +143,7 @@ function App() {
         ))}
       </div>
       <div className="footer-container">
-        {`Managing ${numTabs} tab${numTabs === 1 ? "" : "s"} in ${windows.length} window${windows.length === 1 ? "" : "s"}`}
+        {`Managing ${numTabs} tab${numTabs === 1 ? "" : "s"} in ${rawWindows.length} window${rawWindows.length === 1 ? "" : "s"}`}
       </div>
     </ChakraProvider>
   )

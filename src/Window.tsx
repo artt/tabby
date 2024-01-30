@@ -1,13 +1,14 @@
 import clsx from 'clsx'
 import { getFaviconUrl } from './utils'
-import { debugMode, type GroupData, type TabData, type WindowData } from './App'
+import { debugMode } from './App'
+import { GroupItem, TabItem, WindowItem } from './types'
 
-function handleCloseGroup(event: React.MouseEvent, tabGroup: GroupData) {
+function handleCloseGroup(event: React.MouseEvent, tabGroup: GroupItem) {
   event.stopPropagation()
   tabGroup.children.forEach(tab => chrome.tabs.remove(tab.id!))
 }
 
-function Tab({tab, className="", style}: {tab: TabData, className?: string, style?: React.CSSProperties}) {
+function Tab({tab, className="", style}: {tab: TabItem, className?: string, style?: React.CSSProperties}) {
 
   function handleClick(event: React.MouseEvent) {
     event.stopPropagation()
@@ -40,13 +41,13 @@ function Tab({tab, className="", style}: {tab: TabData, className?: string, styl
 }
 
 
-function Window({windowData, focusedTabs}: {windowData: WindowData, focusedTabs: number[]}) {
+function Window({windowData, focusedTabs}: {windowData: WindowItem, focusedTabs: number[]}) {
 
   return (
     <div className="window">
       {windowData.children.map((el, i) => {
         if (el.kind === "tabGroup") {
-          const tmp = el as GroupData
+          const tmp = el as GroupItem
           return (
             <div className="first-level tab-group" key={i} style={{"--color": `var(--${tmp.color})`} as React.CSSProperties}>
               <div className="tab-group-header">
@@ -62,7 +63,7 @@ function Window({windowData, focusedTabs}: {windowData: WindowData, focusedTabs:
           )
         }
         else {
-          const tmp = el as TabData
+          const tmp = el as TabItem
           return (
             <Tab tab={tmp} className={clsx("first-level", focusedTabs.includes(el.id!) && "focused")} key={i} />
           )
