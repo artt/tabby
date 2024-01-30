@@ -31,7 +31,8 @@ async function group() {
   console.log("tabIds:", tabIds)
   console.log("Making call to OpenAI...")
   const res = await openai.chat.completions.create({
-    model: "gpt-4-1106-preview",
+    // model: "gpt-3.5-turbo-0125",
+    model: "gpt-4-0125-preview",
     response_format: { "type": "json_object" },
     messages: [
       {
