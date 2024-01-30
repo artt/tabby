@@ -82,8 +82,6 @@ function App() {
   }
 
   
-
-
   React.useEffect(() => {
     if (debugMode) return
     setNumTabs(rawWindows.map(window => window.tabs?.length ?? 0).reduce((a, b) => a + b, 0))
