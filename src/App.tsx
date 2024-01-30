@@ -1,14 +1,16 @@
 import React from 'react'
-import Window from './Window'
 import './style.scss'
 import { Controls } from './components/Controls'
 import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } from './utils'
 import clsx from 'clsx'
 import { ChakraProvider } from '@chakra-ui/react'
 import theme from './theme'
+import { Window } from './components/Items'
 
 import { data } from './data'
 import { WindowItem } from './types'
+import { DndContext } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 export const debugMode = import.meta.env.MODE === "development"
 
@@ -132,13 +134,21 @@ function App() {
     >
       <Controls searchString={searchString} setSearchString={setSearchString}/>
       <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
-        {windowsData.map(windowData => (
-          <Window
-            key={windowData.id}
-            windowData={windowData}
-            focusedTabs={focusedTabs}
-          />
-        ))}
+        <DndContext>
+          <SortableContext
+            items={windowsData.map(window => window.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {windowsData.map(windowData => (
+              <Window
+                key={windowData.id}
+                window={windowData}
+                className="window"
+                focusedTabs={focusedTabs}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
       <div className="footer-container">
         {`Managing ${numTabs} tab${numTabs === 1 ? "" : "s"} in ${rawWindows.length} window${rawWindows.length === 1 ? "" : "s"}`}

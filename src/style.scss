@@ -155,7 +155,7 @@ body {
   margin: 4px 0 4px var(--left-space);
   background-color: rgb(from var(--color) r g b / 10%);
   .tab {
-    border-left: 2px solid;
+    border-left: 2px var(--color) solid;
     padding-left: 4px;
     &:last-child {
       border-bottom-left-radius: 4px;
