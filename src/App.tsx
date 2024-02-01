@@ -8,14 +8,20 @@ import theme from './theme'
 import { Window } from './components/Items'
 
 import { data } from './data'
-import { WindowItem } from './types'
-import { DndContext, DragOverlay, UniqueIdentifier } from '@dnd-kit/core'
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { createPortal } from 'react-dom'
+import { TabItem, TreeItem, WindowItem } from './types'
+import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
+import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
+// import { createPortal } from 'react-dom'
 
 export const debugMode = import.meta.env.MODE === "development"
 
 function App() {
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+        activationConstraint: { distance: 4 }
+    })
+  )
 
   const [rawWindows, setRawWindows] = React.useState<chrome.windows.Window[]>([])
   const [rawTabGroups, setRawTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
@@ -141,23 +147,23 @@ function App() {
   //   return list.findIndex(item => item.id === id)
   // }
 
-  // // return the object of found ID, which could be a child of a child
-  // function getItemById(id: UniqueIdentifier): TreeItem {
-  //   let foundItem: TreeItem | null = null;
-  //   function findItem(item: TreeItem) {
-  //     if (item.id === id) {
-  //       foundItem = item;
-  //     }
-  //     else {
-  //       item.children.forEach(child => findItem(child));
-  //     }
-  //   }
-  //   windowsData.forEach(item => findItem(item));
-  //   if (foundItem == null) {
-  //     throw new Error(`Could not find item with ID ${id}`);
-  //   }
-  //   return foundItem;
-  // }
+  // return the object of found ID, which could be a child of a child
+  function getItemById(id: UniqueIdentifier): TreeItem {
+    let foundItem: TreeItem | null = null;
+    function findItem(item: TreeItem) {
+      if (item.id === id) {
+        foundItem = item;
+      }
+      else {
+        item.children.forEach(child => findItem(child));
+      }
+    }
+    windowsData.forEach(item => findItem(item));
+    if (foundItem == null) {
+      throw new Error(`Could not find item with ID ${id}`);
+    }
+    return foundItem;
+  }
 
 
   return (
@@ -167,17 +173,42 @@ function App() {
       <Controls searchString={searchString} setSearchString={setSearchString}/>
       <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
         <DndContext
+          sensors={sensors}
           onDragStart={({ active }) => {
             setDraggedId(active.id);
             setClonedWindowsData(windowsData)
           }}
-          // onDragEnd={({active, over}) => {
-          //   // let's assume for now that it's within the same container (window 0)
-          //   // will have to write something to check later
-          //   if (!over) return
-          //   const activeItem = getItemById(active.id);
-          //   chrome.tabs.move(active.id, {windowId: activeItem.windowId, index: -1})
-          // }}
+          onDragEnd={({active, over}) => {
+            // let's assume for now that it's within the same container (window 0)
+            // will have to write something to check later
+            if (!over) return
+            if (!active.id || !over.id) return
+            const activeItem = getItemById(active.id) as TabItem;
+            if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
+              // get the index of the over item in that window
+              const windowId = activeItem.windowId
+              const window = getItemById(windowId)
+              const overTabIndex = (window as WindowItem).tabs!.findIndex(tab => tab.id === over.id)
+              const overIndex = window.children.findIndex(child => child.id === over.id)
+              const activeIndex = window.children.findIndex(child => child.id === active.id)
+              console.log(overIndex, activeIndex)
+              if (overIndex > -1 && overTabIndex > -1) {
+                // move the tab to the overTabIndex
+                chrome.tabs.move((active.id as number), {windowId: (activeItem as TabItem).windowId, index: overTabIndex})
+                setWindowsData(
+                  windowsData.map(window => {
+                    if (window.id === windowId) {
+                      return {
+                        ...window,
+                        children: arrayMove(window.children, activeIndex, overIndex)
+                      }
+                    }
+                    return window
+                  })
+                )
+              }
+            }
+          }}
           onDragCancel={() => {
             if (clonedWindowsData) {
               setWindowsData(clonedWindowsData)
@@ -199,20 +230,20 @@ function App() {
               />
             ))}
           </SortableContext>
-          {createPortal(
+          {/* {createPortal(
             <DragOverlay
               // adjustScale={adjustScale}
               // dropAnimation={dropAnimation}
             >
-              {/* {activeId
+              {activeId
                 ? windows.includes(activeId)
                   ? renderContainerDragOverlay(activeId)
                   : renderSortableItemDragOverlay(activeId)
-                : null} */}
+                : null}
               <div>xxx</div>
             </DragOverlay>,
             document.body
-          )}
+          )} */}
         </DndContext>
       </div>
       <div className="footer-container">

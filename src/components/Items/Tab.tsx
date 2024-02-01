@@ -24,11 +24,12 @@ export const Tab = ({tab, className=""}: TabProps) => {
   
   const style = {
     transform: CSS.Transform.toString(transform),
-    // transition: 'transform 200ms ease',
+    // transition: 'transform 0s linear',
     transition,
   };
 
   function handleClick(event: React.MouseEvent) {
+    console.log('click')
     event.stopPropagation()
     chrome.windows.update(tab.windowId!, {focused: true})
     chrome.sidePanel.open({windowId: tab.windowId!})
