@@ -30,7 +30,8 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
       className={className}
     >
       {window.children.length > 0 &&
-        <SortableContext 
+        <SortableContext
+          id={window.id.toString()}
           items={window.children.map((item: TreeItem) => item.id)}
           strategy={verticalListSortingStrategy}
         >

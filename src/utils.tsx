@@ -42,3 +42,11 @@ export const processTabItem = (rawTab: chrome.tabs.Tab, parentId: UniqueIdentifi
   kind: "tab",
   children: [],
 })
+
+interface ObjectWithId {
+  id: UniqueIdentifier
+}
+
+export function getIndexFromId(id: UniqueIdentifier, list: ObjectWithId[] ): number {
+  return list.findIndex(item => item.id === id)
+}

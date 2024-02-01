@@ -22,6 +22,7 @@ function App() {
   const [numTabs, setNumTabs] = React.useState<number>(0)
 
   const [windowsData, setWindowsData] = React.useState<WindowItem[]>([])
+  const [clonedWindowsData, setClonedWindowsData] = React.useState<WindowItem[]>([])
   // additional properties of tabs are stored in a separate object
   const [focusedTabs, setFocusedTabs] = React.useState<number[]>([])
 
@@ -132,8 +133,31 @@ function App() {
   }, [windowsData, searchString])
 
   React.useEffect(() => {
-    // console.log(windowsData)
+    // console.log(windowsData[1])
   }, [windowsData])
+
+  // // return the index of found ID
+  // function getIdIndex(id: UniqueIdentifier, list: TreeItem[]): number {
+  //   return list.findIndex(item => item.id === id)
+  // }
+
+  // // return the object of found ID, which could be a child of a child
+  // function getItemById(id: UniqueIdentifier): TreeItem {
+  //   let foundItem: TreeItem | null = null;
+  //   function findItem(item: TreeItem) {
+  //     if (item.id === id) {
+  //       foundItem = item;
+  //     }
+  //     else {
+  //       item.children.forEach(child => findItem(child));
+  //     }
+  //   }
+  //   windowsData.forEach(item => findItem(item));
+  //   if (foundItem == null) {
+  //     throw new Error(`Could not find item with ID ${id}`);
+  //   }
+  //   return foundItem;
+  // }
 
 
   return (
@@ -143,10 +167,23 @@ function App() {
       <Controls searchString={searchString} setSearchString={setSearchString}/>
       <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
         <DndContext
-          onDragStart={({active, ...rest}) => {
+          onDragStart={({ active }) => {
             setDraggedId(active.id);
-            console.log(active, rest)
-            // setClonedItems(items);
+            setClonedWindowsData(windowsData)
+          }}
+          // onDragEnd={({active, over}) => {
+          //   // let's assume for now that it's within the same container (window 0)
+          //   // will have to write something to check later
+          //   if (!over) return
+          //   const activeItem = getItemById(active.id);
+          //   chrome.tabs.move(active.id, {windowId: activeItem.windowId, index: -1})
+          // }}
+          onDragCancel={() => {
+            if (clonedWindowsData) {
+              setWindowsData(clonedWindowsData)
+            }
+            setDraggedId(null)
+            setClonedWindowsData([])
           }}
         >
           <SortableContext
