@@ -19,10 +19,12 @@ export const Tab = ({tab, className=""}: TabProps) => {
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({id: tab.id});
   
   const style = {
     transform: CSS.Transform.toString(transform),
+    // transition: 'transform 200ms ease',
     transition,
   };
 
@@ -47,7 +49,7 @@ export const Tab = ({tab, className=""}: TabProps) => {
         tab.active && "tab-active",
         className || "",
       )}
-      style={style}
+      style={{...style, opacity: isDragging ? 0.5 : 1}}
       onClick={handleClick}
       {...attributes}
       {...listeners}

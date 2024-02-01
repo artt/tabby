@@ -9,8 +9,9 @@ import { Window } from './components/Items'
 
 import { data } from './data'
 import { WindowItem } from './types'
-import { DndContext } from '@dnd-kit/core'
+import { DndContext, DragOverlay, UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { createPortal } from 'react-dom'
 
 export const debugMode = import.meta.env.MODE === "development"
 
@@ -25,6 +26,9 @@ function App() {
   const [focusedTabs, setFocusedTabs] = React.useState<number[]>([])
 
   const [searchString, setSearchString] = React.useState("")
+
+  const [draggedId, setDraggedId] = React.useState<UniqueIdentifier | null>(null);
+
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
@@ -113,6 +117,10 @@ function App() {
   }, [rawWindows, rawTabGroups])
 
   React.useEffect(() => {
+    console.log(draggedId)
+  }, [draggedId])
+
+  React.useEffect(() => {
     if (searchString === "") return
     // populate focusedTabs with tabs that match the search string
     let newFocusedTabs: number[] = []
@@ -124,7 +132,7 @@ function App() {
   }, [windowsData, searchString])
 
   React.useEffect(() => {
-    console.log(windowsData)
+    // console.log(windowsData)
   }, [windowsData])
 
 
@@ -134,7 +142,13 @@ function App() {
     >
       <Controls searchString={searchString} setSearchString={setSearchString}/>
       <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
-        <DndContext>
+        <DndContext
+          onDragStart={({active, ...rest}) => {
+            setDraggedId(active.id);
+            console.log(active, rest)
+            // setClonedItems(items);
+          }}
+        >
           <SortableContext
             items={windowsData.map(window => window.id)}
             strategy={verticalListSortingStrategy}
@@ -148,6 +162,20 @@ function App() {
               />
             ))}
           </SortableContext>
+          {createPortal(
+            <DragOverlay
+              // adjustScale={adjustScale}
+              // dropAnimation={dropAnimation}
+            >
+              {/* {activeId
+                ? windows.includes(activeId)
+                  ? renderContainerDragOverlay(activeId)
+                  : renderSortableItemDragOverlay(activeId)
+                : null} */}
+              <div>xxx</div>
+            </DragOverlay>,
+            document.body
+          )}
         </DndContext>
       </div>
       <div className="footer-container">

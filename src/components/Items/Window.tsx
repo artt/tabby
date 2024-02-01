@@ -10,6 +10,7 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({id: window.id});
   
   const style = {
@@ -18,7 +19,16 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={className}>
+    <div
+      ref={setNodeRef}
+      style={{
+        ...style,
+        opacity: isDragging ? 0.5 : 1,
+      }}
+      {...attributes}
+      {...listeners}
+      className={className}
+    >
       {window.children.length > 0 &&
         <SortableContext 
           items={window.children.map((item: TreeItem) => item.id)}

@@ -23,6 +23,7 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
     setNodeRef,
     transform,
     transition,
+    isDragging,
   } = useSortable({id: tabGroup.id});
   
   const style = {
@@ -34,7 +35,11 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
     <div
       ref={setNodeRef}
       className={"first-level tab-group " + className}
-      style={{...style, "--color": `var(--${tabGroup.color})`} as React.CSSProperties}
+      style={{
+        ...style,
+        "--color": `var(--${tabGroup.color})`,
+        opacity: isDragging ? 0.5 : 1
+      } as React.CSSProperties}
       {...attributes}
       {...listeners}
     >
