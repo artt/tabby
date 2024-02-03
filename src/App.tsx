@@ -165,6 +165,27 @@ function App() {
     return foundItem;
   }
 
+  // This function returns an array of indices, referred to as an 'index tree', for a given ID.
+  // The 'index tree' represents the hierarchical location of the item within the structure.
+  // The first element in the array is the index of the window where the item is located.
+  // The second element is either the index of the item within the window (if the item is a direct child of the window),
+  // or the index of the tab group within the window (if the item is within a tab group), and so on for deeper levels of nesting.
+  function getIndexTreeFromId(id: UniqueIdentifier, tree: TreeItem[] = windowsData): number[] {
+    let foundIndexTree: number[] = [];
+    function findIndexTree(item: TreeItem, indexTree: number[]) {
+      if (item.id === id) {
+        foundIndexTree = indexTree;
+      }
+      else {
+        item.children.forEach((child, index) => findIndexTree(child, [...indexTree, index]));
+      }
+    }
+    tree.forEach((item, index) => findIndexTree(item, [index]));
+    if (foundIndexTree.length === 0) {
+      throw new Error(`Could not find index tree for item with ID ${id}`);
+    }
+    return foundIndexTree;
+  }
 
   return (
     <ChakraProvider
@@ -183,30 +204,160 @@ function App() {
 
             if (!over?.id) return
 
-            const activeItem = getItemFromId(active.id)
-            const overItem = getItemFromId(over.id)
+            console.log("dragover", getItemFromId(active.id), getItemFromId(over.id))
 
-            if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
-              // get the index of the over item in that window
-              const windowId = (activeItem as (TabItem | GroupItem)).windowId
-              const window = getItemFromId(windowId) as WindowItem
-              const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
-              const overIndex = getIndexFromId(over.id, window.children)
-              const activeIndex = getIndexFromId(active.id, window.children)
-              if (overIndex > -1 && overTabIndex > -1) {
-                setWindowsData(
-                  windowsData.map(window => {
-                    if (window.id === windowId) {
-                      return {
-                        ...window,
-                        children: arrayMove(window.children, activeIndex, overIndex)
-                      }
-                    }
-                    return window
-                  })
-                )
+            const activeIndexTree = getIndexTreeFromId(active.id)
+            const overIndexTree = getIndexTreeFromId(over.id)
+
+            console.log(activeIndexTree, overIndexTree)
+
+            function deleteItem(currentTree: TreeItem[], indexTree: number[]) {
+              if (indexTree.length === 1) {
+                return currentTree.filter((_, i) => i !== indexTree[0])
+              }
+              else {
+                const newTree: TreeItem[] = []
+                for (let i = 0; i < currentTree.length; i ++) {
+                  if (i === indexTree[0]) {
+                    const newChildren = deleteItem(currentTree[i].children, indexTree.slice(1))
+                    newTree.push({
+                      ...currentTree[i],
+                      children: newChildren
+                    })
+                  }
+                  else {
+                    newTree.push(currentTree[i])
+                  }
+                }
+                return newTree
               }
             }
+
+            function addItem(currentTree: TreeItem[], indexTree: number[], item: TreeItem) {
+              if (indexTree.length === 1) {
+                return [
+                  ...currentTree.slice(0, indexTree[0]),
+                  item,
+                  ...currentTree.slice(indexTree[0])
+                ]
+              }
+              else {
+                const newTree: TreeItem[] = []
+                for (let i = 0; i < currentTree.length; i ++) {
+                  if (i === indexTree[0]) {
+                    const newChildren = addItem(currentTree[i].children, indexTree.slice(1), item)
+                    newTree.push({
+                      ...currentTree[i],
+                      children: newChildren
+                    })
+                  }
+                  else {
+                    newTree.push(currentTree[i])
+                  }
+                }
+                return newTree
+              }
+            }
+
+            function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[]) {
+              console.log("moveItem called with ", currentTree, activeIndexTree, overIndexTree)
+              if (activeIndexTree[0] === overIndexTree[0]) {
+                console.log("same parent")
+                const newTree: TreeItem[] = []
+                for (let i = 0; i < currentTree.length; i ++) {
+                  if (i === activeIndexTree[0]) {
+                    const newChildren = moveItem(currentTree[i].children, activeIndexTree.slice(1), overIndexTree.slice(1))
+                    newTree.push({
+                      ...currentTree[i],
+                      children: newChildren
+                    })
+                  }
+                  else {
+                    newTree.push(currentTree[i])
+                  }
+                }
+                return newTree
+              }
+              else if (activeIndexTree.length === 1 && overIndexTree.length === 1) {
+                console.log("one item left")
+                return arrayMove(currentTree, activeIndexTree[0], overIndexTree[0])
+              }
+              // last case is when active and over don't have the same parent
+              // we need to remove the active item from its current parent
+              // then add the active item to the over item's children
+              else {
+                // TODO: still need to fix this..... but getting close!
+                console.log("different parent")
+                // get the active item
+                const activeItem = getItemFromId(active.id)
+                const newTree: TreeItem[] = []
+                for (let i = 0; i < currentTree.length; i ++) {
+                  if (i === activeIndexTree[0]) {
+                    const newChildren = deleteItem(currentTree[i].children, activeIndexTree.slice(1))
+                    newTree.push({
+                      ...currentTree[i],
+                      children: newChildren
+                    })
+                  }
+                  else if (i === overIndexTree[0]) {
+                    const newChildren = addItem(currentTree[i].children, overIndexTree.slice(1), activeItem)
+                    newTree.push({
+                      ...currentTree[i],
+                      children: newChildren
+                    })
+                  }
+                  else {
+                    newTree.push(currentTree[i])
+                  }
+                }
+                return newTree
+              }
+            }
+            
+            const tmp = moveItem(windowsData, activeIndexTree, overIndexTree) as WindowItem[]
+            console.log(tmp)
+            setWindowsData(tmp)
+
+
+            // steps
+
+            // 1. get index tree of both the active and over items
+
+            // 2. check the type of activeitem. if it's not a window, compare the index trees to see if they have the same parent
+            
+              // 2.1. if both of them have the same parent, then we can do a simple arrayMove
+              // to figure out what the new windowsData should be,
+              // traverse the windowsData according to the index tree of the active item
+
+              // 2.2. if they don't have the same parent, then we need to do two things
+              // first, we need to remove the active item from its current parent
+              // then, we need to add the active item to the over item's children
+
+            // we won't allow dragging windows and "merging" stuff for now
+
+            // const activeItem = getItemFromId(active.id)
+            // const overItem = getItemFromId(over.id)
+            // if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
+            //   // get the index of the over item in that window
+            //   const windowId = (activeItem as (TabItem | GroupItem)).windowId
+            //   const window = getItemFromId(windowId) as WindowItem
+            //   const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
+            //   const overIndex = getIndexFromId(over.id, window.children)
+            //   const activeIndex = getIndexFromId(active.id, window.children)
+            //   if (overIndex > -1 && overTabIndex > -1) {
+            //     setWindowsData(
+            //       windowsData.map(window => {
+            //         if (window.id === windowId) {
+            //           return {
+            //             ...window,
+            //             children: arrayMove(window.children, activeIndex, overIndex)
+            //           }
+            //         }
+            //         return window
+            //       })
+            //     )
+            //   }
+            // }
           }}
           onDragEnd={({active, over}) => {
             document.getElementById("windows-container")?.classList.remove("dragging")
