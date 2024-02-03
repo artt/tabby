@@ -8,7 +8,7 @@ import theme from './theme'
 import { Window } from './components/Items'
 
 import { data } from './data'
-import { TabItem, TreeItem, WindowItem } from './types'
+import { GroupItem, TabItem, TreeItem, WindowItem } from './types'
 import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 // import { createPortal } from 'react-dom'
@@ -139,16 +139,16 @@ function App() {
   }, [windowsData, searchString])
 
   React.useEffect(() => {
-    // console.log(windowsData[1])
+    console.log(windowsData[0])
   }, [windowsData])
 
-  // // return the index of found ID
-  // function getIdIndex(id: UniqueIdentifier, list: TreeItem[]): number {
-  //   return list.findIndex(item => item.id === id)
-  // }
+  // return the index of found ID
+  function getIndexFromId(id: UniqueIdentifier, list: {id: UniqueIdentifier | undefined}[]): number {
+    return list.findIndex(item => item.id === id)
+  }
 
   // return the object of found ID, which could be a child of a child
-  function getItemById(id: UniqueIdentifier): TreeItem {
+  function getItemFromId(id: UniqueIdentifier): TreeItem {
     let foundItem: TreeItem | null = null;
     function findItem(item: TreeItem) {
       if (item.id === id) {
@@ -171,30 +171,29 @@ function App() {
       theme={theme}
     >
       <Controls searchString={searchString} setSearchString={setSearchString}/>
-      <div className={clsx("windows-container", searchString !== "" && "search-mode")}>
+      <div id="windows-container" className={clsx(searchString !== "" && "search-mode")}>
         <DndContext
           sensors={sensors}
           onDragStart={({ active }) => {
+            document.getElementById("windows-container")?.classList.add("dragging")
             setDraggedId(active.id);
             setClonedWindowsData(windowsData)
           }}
-          onDragEnd={({active, over}) => {
-            // let's assume for now that it's within the same container (window 0)
-            // will have to write something to check later
-            if (!over) return
-            if (!active.id || !over.id) return
-            const activeItem = getItemById(active.id) as TabItem;
+          onDragOver={({active, over}) => {
+
+            if (!over?.id) return
+
+            const activeItem = getItemFromId(active.id)
+            const overItem = getItemFromId(over.id)
+
             if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
               // get the index of the over item in that window
-              const windowId = activeItem.windowId
-              const window = getItemById(windowId)
-              const overTabIndex = (window as WindowItem).tabs!.findIndex(tab => tab.id === over.id)
-              const overIndex = window.children.findIndex(child => child.id === over.id)
-              const activeIndex = window.children.findIndex(child => child.id === active.id)
-              console.log(overIndex, activeIndex)
+              const windowId = (activeItem as (TabItem | GroupItem)).windowId
+              const window = getItemFromId(windowId) as WindowItem
+              const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
+              const overIndex = getIndexFromId(over.id, window.children)
+              const activeIndex = getIndexFromId(active.id, window.children)
               if (overIndex > -1 && overTabIndex > -1) {
-                // move the tab to the overTabIndex
-                chrome.tabs.move((active.id as number), {windowId: (activeItem as TabItem).windowId, index: overTabIndex})
                 setWindowsData(
                   windowsData.map(window => {
                     if (window.id === windowId) {
@@ -209,7 +208,46 @@ function App() {
               }
             }
           }}
+          onDragEnd={({active, over}) => {
+            document.getElementById("windows-container")?.classList.remove("dragging")
+            // // let's assume for now that it's within the same container (window 0)
+            // // will have to write something to check later
+            // if (!over?.id) return
+
+            // const activeItem = getItemFromId(active.id)
+            // const overItem = getItemFromId(over.id)
+
+            // if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
+            //   // get the index of the over item in that window
+            //   const windowId = (activeItem as (TabItem | GroupItem)).windowId
+            //   const window = getItemFromId(windowId) as WindowItem
+            //   const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
+            //   const overIndex = getIndexFromId(over.id, window.children)
+            //   const activeIndex = getIndexFromId(active.id, window.children)
+            //   if (overIndex > -1 && overTabIndex > -1) {
+            //     // move the tab to the overTabIndex
+            //     if (activeItem.kind === "tab") {
+            //       chrome.tabs.move(active.id as number, { index: overTabIndex })
+            //     }
+            //     else {
+            //       chrome.tabGroups.move(active.id as number, { index: overTabIndex })
+            //     }
+            //     setWindowsData(
+            //       windowsData.map(window => {
+            //         if (window.id === windowId) {
+            //           return {
+            //             ...window,
+            //             children: arrayMove(window.children, activeIndex, overIndex)
+            //           }
+            //         }
+            //         return window
+            //       })
+            //     )
+            //   }
+            // }
+          }}
           onDragCancel={() => {
+            document.getElementById("windows-container")?.classList.remove("dragging")
             if (clonedWindowsData) {
               setWindowsData(clonedWindowsData)
             }

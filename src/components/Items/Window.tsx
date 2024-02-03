@@ -14,7 +14,8 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
   } = useSortable({id: window.id});
   
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
+    // transform: CSS.Transform.toString(transform),
     transition,
   };
 

@@ -27,7 +27,8 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
   } = useSortable({id: tabGroup.id});
   
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
+    // transform: CSS.Transform.toString(transform),
     transition,
   };
 

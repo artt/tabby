@@ -12,9 +12,6 @@
   align-items: center;
   height: var(--tab-height);
   padding: 0 var(--left-space);
-  &:hover {
-    background-color: rgb(from var(--text-color) r g b / 10%);
-  }
   transition: height $height-transition;
 }
 
@@ -41,15 +38,6 @@
   display: none;
   opacity: 0.3;
   font-weight: bold;
-}
-
-.tab:hover, .tab-group-header:hover {
-  > .tab-close-icon {
-    display: block;
-    &:hover {
-      opacity: 1;
-    }
-  }
 }
 
 .tab-group-header {
@@ -80,6 +68,22 @@
     // }
   }
   transition: height $height-transition;
+}
+
+#windows-container:not(.dragging) {
+  .tab {
+    &:hover {
+      background-color: rgb(from var(--text-color) r g b / 10%);
+    }
+  }
+  .tab:hover, .tab-group-header:hover {
+    > .tab-close-icon {
+      display: block;
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
 }
 
 .search-mode {

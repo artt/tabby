@@ -23,7 +23,8 @@ export const Tab = ({tab, className=""}: TabProps) => {
   } = useSortable({id: tab.id});
   
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
+    // transform: CSS.Transform.toString(transform),
     // transition: 'transform 0s linear',
     transition,
   };
