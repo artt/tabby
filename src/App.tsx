@@ -139,7 +139,7 @@ function App() {
   }, [windowsData, searchString])
 
   React.useEffect(() => {
-    console.log(windowsData[0])
+    // console.log(windowsData[0])
   }, [windowsData])
 
   // return the index of found ID
@@ -204,12 +204,12 @@ function App() {
 
             if (!over?.id) return
 
-            console.log("dragover", getItemFromId(active.id), getItemFromId(over.id))
+            // console.log("dragover", getItemFromId(active.id), getItemFromId(over.id))
 
             const activeIndexTree = getIndexTreeFromId(active.id)
             const overIndexTree = getIndexTreeFromId(over.id)
 
-            console.log(activeIndexTree, overIndexTree)
+            // console.log(activeIndexTree, overIndexTree)
 
             function deleteItem(currentTree: TreeItem[], indexTree: number[]) {
               if (indexTree.length === 1) {
@@ -260,9 +260,8 @@ function App() {
             }
 
             function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[]) {
-              console.log("moveItem called with ", currentTree, activeIndexTree, overIndexTree)
               if (activeIndexTree[0] === overIndexTree[0]) {
-                console.log("same parent")
+                // console.log("same parent")
                 const newTree: TreeItem[] = []
                 for (let i = 0; i < currentTree.length; i ++) {
                   if (i === activeIndexTree[0]) {
@@ -279,15 +278,13 @@ function App() {
                 return newTree
               }
               else if (activeIndexTree.length === 1 && overIndexTree.length === 1) {
-                console.log("one item left")
+                // console.log("one item left")
                 return arrayMove(currentTree, activeIndexTree[0], overIndexTree[0])
               }
               // last case is when active and over don't have the same parent
               // we need to remove the active item from its current parent
               // then add the active item to the over item's children
               else {
-                // TODO: still need to fix this..... but getting close!
-                console.log("different parent")
                 // get the active item
                 const activeItem = getItemFromId(active.id)
                 const newTree: TreeItem[] = []
@@ -314,6 +311,7 @@ function App() {
               }
             }
             
+            console.log("moveItem called with ", activeIndexTree, overIndexTree)
             const tmp = moveItem(windowsData, activeIndexTree, overIndexTree) as WindowItem[]
             console.log(tmp)
             setWindowsData(tmp)
