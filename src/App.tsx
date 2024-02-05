@@ -8,7 +8,7 @@ import theme from './theme'
 import { Window } from './components/Items'
 
 import { data } from './data'
-import { GroupItem, TabItem, TreeItem, WindowItem } from './types'
+import { TreeItem, WindowItem } from './types'
 import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 // import { createPortal } from 'react-dom'
@@ -40,7 +40,7 @@ function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
     if (debugMode) return
-    chrome.windows.getAll({populate: true}).then(res => setRawWindows(res))
+    chrome.windows.getAll({ populate: true }).then(res => setRawWindows(res))
     chrome.tabGroups.query({}).then(res => setRawTabGroups(res))
     // chrome.tabs.query({}).then(res => setTabs(res))
   }
@@ -143,9 +143,9 @@ function App() {
   }, [windowsData])
 
   // return the index of found ID
-  function getIndexFromId(id: UniqueIdentifier, list: {id: UniqueIdentifier | undefined}[]): number {
-    return list.findIndex(item => item.id === id)
-  }
+  // function getIndexFromId(id: UniqueIdentifier, list: {id: UniqueIdentifier | undefined}[]): number {
+  //   return list.findIndex(item => item.id === id)
+  // }
 
   // return the object of found ID, which could be a child of a child
   function getItemFromId(id: UniqueIdentifier): TreeItem {
@@ -187,6 +187,19 @@ function App() {
     return foundIndexTree;
   }
 
+  // function getItemFromIndexTree(indexTree: number[], tree: TreeItem[] = windowsData): TreeItem | null {
+  //   if (indexTree.length === 0) {
+  //     throw new Error("Index tree must not be empty");
+  //   }
+  //   if (!tree[indexTree[0]]) return null
+  //   else if (indexTree.length === 1) {
+  //     return tree[indexTree[0]];
+  //   }
+  //   else {
+  //     return getItemFromIndexTree(indexTree.slice(1), tree[indexTree[0]].children);
+  //   }
+  // }
+
   return (
     <ChakraProvider
       theme={theme}
@@ -203,11 +216,21 @@ function App() {
           onDragOver={({active, over}) => {
 
             if (!over?.id) return
+            if (active.id === over.id) return
 
-            // console.log("dragover", getItemFromId(active.id), getItemFromId(over.id))
 
             const activeIndexTree = getIndexTreeFromId(active.id)
             const overIndexTree = getIndexTreeFromId(over.id)
+
+            // if moved to own parent then do nothing
+            if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
+            if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+
+            console.log("dragover", getItemFromId(over.id).title)
+
+
+            // const activeItem = getItemFromId(active.id)
+            // const overItem = getItemFromId(over.id)
 
             // console.log(activeIndexTree, overIndexTree)
 
@@ -260,8 +283,9 @@ function App() {
             }
 
             function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[]) {
+              console.log('moveItem called with ', activeIndexTree, overIndexTree)
               if (activeIndexTree[0] === overIndexTree[0]) {
-                // console.log("same parent")
+                console.log("same parent")
                 const newTree: TreeItem[] = []
                 for (let i = 0; i < currentTree.length; i ++) {
                   if (i === activeIndexTree[0]) {
@@ -285,23 +309,35 @@ function App() {
               // we need to remove the active item from its current parent
               // then add the active item to the over item's children
               else {
+                console.log("different parent")
                 // get the active item
                 const activeItem = getItemFromId(active.id)
                 const newTree: TreeItem[] = []
                 for (let i = 0; i < currentTree.length; i ++) {
                   if (i === activeIndexTree[0]) {
+                    if (activeIndexTree.length === 1) {
+                      continue 
+                    }
                     const newChildren = deleteItem(currentTree[i].children, activeIndexTree.slice(1))
+                    console.log('new children for active', newChildren)
                     newTree.push({
                       ...currentTree[i],
                       children: newChildren
                     })
                   }
                   else if (i === overIndexTree[0]) {
-                    const newChildren = addItem(currentTree[i].children, overIndexTree.slice(1), activeItem)
-                    newTree.push({
-                      ...currentTree[i],
-                      children: newChildren
-                    })
+                    if (overIndexTree.length === 1) {
+                      newTree.push(activeItem)
+                      newTree.push(currentTree[i])
+                    }
+                    else {
+                      const newChildren = addItem(currentTree[i].children, overIndexTree.slice(1), activeItem)
+                      console.log('new children for over', newChildren)
+                      newTree.push({
+                        ...currentTree[i],
+                        children: newChildren
+                      })
+                    }
                   }
                   else {
                     newTree.push(currentTree[i])
@@ -311,7 +347,7 @@ function App() {
               }
             }
             
-            console.log("moveItem called with ", activeIndexTree, overIndexTree)
+            // console.log("moveItem called with ", activeIndexTree, overIndexTree)
             const tmp = moveItem(windowsData, activeIndexTree, overIndexTree) as WindowItem[]
             console.log(tmp)
             setWindowsData(tmp)
@@ -358,21 +394,57 @@ function App() {
             // }
           }}
           onDragEnd={({active, over}) => {
+            // console.log("dragend", active.id, over?.id)
             document.getElementById("windows-container")?.classList.remove("dragging")
+
+            // TODO: At this point we need to find the new index of the active item and send the command to chrome
+            // to move the tab to that index
+
+            if (!over?.id) return
+
+            const activeItem = getItemFromId(active.id)
+            if (activeItem.kind === "window") return
+
+            
+            const activeIndexTree = getIndexTreeFromId(active.id)
+            // if it's not the first child of its parent, look at the index of its previous sibling and add one to it
+            if (activeIndexTree[activeIndexTree.length - 1] > 0) {
+              if (activeItem.kind === "tab") {
+                chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
+              }
+              else if (activeItem.kind === "tabGroup") {
+                chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
+              }
+            }
+            // if it's the first child of its parent, look at the index of its parent
+            // also update its groupId if it's in a tab group
+            else {
+              if (activeItem.kind === "tab") {
+                chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
+              }
+              else if (activeItem.kind === "tabGroup") {
+                chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
+              }
+            }
+
+
+
+
             // // let's assume for now that it's within the same container (window 0)
             // // will have to write something to check later
-            // if (!over?.id) return
 
             // const activeItem = getItemFromId(active.id)
             // const overItem = getItemFromId(over.id)
 
             // if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
+            //   console.log('active', activeItem, 'over', overItem)
             //   // get the index of the over item in that window
             //   const windowId = (activeItem as (TabItem | GroupItem)).windowId
             //   const window = getItemFromId(windowId) as WindowItem
             //   const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
             //   const overIndex = getIndexFromId(over.id, window.children)
             //   const activeIndex = getIndexFromId(active.id, window.children)
+            //   console.log(overTabIndex)
             //   if (overIndex > -1 && overTabIndex > -1) {
             //     // move the tab to the overTabIndex
             //     if (activeItem.kind === "tab") {
