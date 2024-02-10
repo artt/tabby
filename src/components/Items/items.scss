@@ -54,7 +54,7 @@
 }
 
 .tab-group {
-  overflow-y: hidden;
+  overflow-x: hidden;
   margin: 4px 0 4px var(--left-space);
   background-color: rgb(from var(--color) r g b / 10%);
   border-top-left-radius: 4px;

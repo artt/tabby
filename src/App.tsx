@@ -8,7 +8,7 @@ import theme from './theme'
 import { Window } from './components/Items'
 
 import { data } from './data'
-import { TreeItem, WindowItem } from './types'
+import { GroupItem, TreeItem, WindowItem } from './types'
 import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 // import { createPortal } from 'react-dom'
@@ -187,6 +187,31 @@ function App() {
     return foundIndexTree;
   }
 
+  // From an index tree, return the index of the item within the window (specified by the first element of the index tree).
+  // This is done by looking at number of tabs within tabgroups before the item.
+  function getWindowsTabIndexFromIndexTree(indexTree: number[], tree: TreeItem[] = windowsData): number {
+    if (indexTree.length < 2) {
+      throw new Error("Index tree must have at least two elements");
+    }
+    const currentWindow = tree[indexTree[0]]
+    let count = 0
+    for (let i = 0; i < indexTree[1]; i ++) {
+      if (currentWindow.children[i].kind === "tab") {
+        count ++
+      }
+      else if (currentWindow.children[i].kind === "tabGroup") {
+        count += (currentWindow.children[i] as GroupItem).children.length
+      }
+    }
+    if (indexTree.length === 2) {
+      return count
+    }
+    else {
+      // move into the group
+      return count + indexTree[2]
+    }
+  }
+
   // function getItemFromIndexTree(indexTree: number[], tree: TreeItem[] = windowsData): TreeItem | null {
   //   if (indexTree.length === 0) {
   //     throw new Error("Index tree must not be empty");
@@ -283,9 +308,7 @@ function App() {
             }
 
             function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[]) {
-              console.log('moveItem called with ', activeIndexTree, overIndexTree)
               if (activeIndexTree[0] === overIndexTree[0]) {
-                console.log("same parent")
                 const newTree: TreeItem[] = []
                 for (let i = 0; i < currentTree.length; i ++) {
                   if (i === activeIndexTree[0]) {
@@ -309,7 +332,6 @@ function App() {
               // we need to remove the active item from its current parent
               // then add the active item to the over item's children
               else {
-                console.log("different parent")
                 // get the active item
                 const activeItem = getItemFromId(active.id)
                 const newTree: TreeItem[] = []
@@ -319,7 +341,6 @@ function App() {
                       continue 
                     }
                     const newChildren = deleteItem(currentTree[i].children, activeIndexTree.slice(1))
-                    console.log('new children for active', newChildren)
                     newTree.push({
                       ...currentTree[i],
                       children: newChildren
@@ -332,7 +353,6 @@ function App() {
                     }
                     else {
                       const newChildren = addItem(currentTree[i].children, overIndexTree.slice(1), activeItem)
-                      console.log('new children for over', newChildren)
                       newTree.push({
                         ...currentTree[i],
                         children: newChildren
@@ -348,6 +368,7 @@ function App() {
             }
             
             // console.log("moveItem called with ", activeIndexTree, overIndexTree)
+            console.log("move", activeIndexTree, overIndexTree)
             const tmp = moveItem(windowsData, activeIndexTree, overIndexTree) as WindowItem[]
             console.log(tmp)
             setWindowsData(tmp)
@@ -405,27 +426,53 @@ function App() {
             const activeItem = getItemFromId(active.id)
             if (activeItem.kind === "window") return
 
-            
             const activeIndexTree = getIndexTreeFromId(active.id)
-            // if it's not the first child of its parent, look at the index of its previous sibling and add one to it
-            if (activeIndexTree[activeIndexTree.length - 1] > 0) {
-              if (activeItem.kind === "tab") {
-                chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
+
+            if (activeItem.kind === "tab") {
+              const newIndex = getWindowsTabIndexFromIndexTree(activeIndexTree)
+              console.log("newIndex", newIndex)
+              let newGroup = -1
+              if (activeIndexTree.length === 3) {
+                console.log("activeIndexTree has length 3")
+                // need to move into the group of the next tab
+                newGroup = windowsData[activeIndexTree[0]].tabs![newIndex].groupId
               }
-              else if (activeItem.kind === "tabGroup") {
-                chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
+              console.log("newGroup", newGroup)
+              chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+              if (newGroup === -1) {
+                chrome.tabs.ungroup(active.id as number)
+              }
+              else {
+                chrome.tabs.group({ tabIds: active.id as number, groupId: newGroup })
               }
             }
-            // if it's the first child of its parent, look at the index of its parent
-            // also update its groupId if it's in a tab group
-            else {
-              if (activeItem.kind === "tab") {
-                chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
-              }
-              else if (activeItem.kind === "tabGroup") {
-                chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
-              }
+            else if (activeItem.kind === "tabGroup") {
+              chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
             }
+
+            // // if it's not the first child of its parent, look at the index of its previous sibling and add one to it
+            // if (activeIndexTree[activeIndexTree.length - 1] > 0) {
+            //   if (activeItem.kind === "tab") {
+            //     // chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
+            //     chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+            //   }
+            //   else if (activeItem.kind === "tabGroup") {
+            //     // chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
+            //     chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+            //   }
+            // }
+            // // if it's the first child of its parent, look at the index of its parent
+            // // also update its groupId if it's in a tab group
+            // else {
+            //   if (activeItem.kind === "tab") {
+            //     // chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
+            //     chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+            //   }
+            //   else if (activeItem.kind === "tabGroup") {
+            //     // chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
+            //     chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+            //   }
+            // }
 
 
 
