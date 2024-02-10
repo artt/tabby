@@ -372,47 +372,6 @@ function App() {
             const tmp = moveItem(windowsData, activeIndexTree, overIndexTree) as WindowItem[]
             console.log(tmp)
             setWindowsData(tmp)
-
-
-            // steps
-
-            // 1. get index tree of both the active and over items
-
-            // 2. check the type of activeitem. if it's not a window, compare the index trees to see if they have the same parent
-            
-              // 2.1. if both of them have the same parent, then we can do a simple arrayMove
-              // to figure out what the new windowsData should be,
-              // traverse the windowsData according to the index tree of the active item
-
-              // 2.2. if they don't have the same parent, then we need to do two things
-              // first, we need to remove the active item from its current parent
-              // then, we need to add the active item to the over item's children
-
-            // we won't allow dragging windows and "merging" stuff for now
-
-            // const activeItem = getItemFromId(active.id)
-            // const overItem = getItemFromId(over.id)
-            // if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
-            //   // get the index of the over item in that window
-            //   const windowId = (activeItem as (TabItem | GroupItem)).windowId
-            //   const window = getItemFromId(windowId) as WindowItem
-            //   const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
-            //   const overIndex = getIndexFromId(over.id, window.children)
-            //   const activeIndex = getIndexFromId(active.id, window.children)
-            //   if (overIndex > -1 && overTabIndex > -1) {
-            //     setWindowsData(
-            //       windowsData.map(window => {
-            //         if (window.id === windowId) {
-            //           return {
-            //             ...window,
-            //             children: arrayMove(window.children, activeIndex, overIndex)
-            //           }
-            //         }
-            //         return window
-            //       })
-            //     )
-            //   }
-            // }
           }}
           onDragEnd={({active, over}) => {
             // console.log("dragend", active.id, over?.id)
@@ -450,69 +409,6 @@ function App() {
               chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
             }
 
-            // // if it's not the first child of its parent, look at the index of its previous sibling and add one to it
-            // if (activeIndexTree[activeIndexTree.length - 1] > 0) {
-            //   if (activeItem.kind === "tab") {
-            //     // chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
-            //     chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
-            //   }
-            //   else if (activeItem.kind === "tabGroup") {
-            //     // chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 1] })
-            //     chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
-            //   }
-            // }
-            // // if it's the first child of its parent, look at the index of its parent
-            // // also update its groupId if it's in a tab group
-            // else {
-            //   if (activeItem.kind === "tab") {
-            //     // chrome.tabs.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
-            //     chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
-            //   }
-            //   else if (activeItem.kind === "tabGroup") {
-            //     // chrome.tabGroups.move(active.id as number, { index: activeIndexTree[activeIndexTree.length - 2] })
-            //     chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
-            //   }
-            // }
-
-
-
-
-            // // let's assume for now that it's within the same container (window 0)
-            // // will have to write something to check later
-
-            // const activeItem = getItemFromId(active.id)
-            // const overItem = getItemFromId(over.id)
-
-            // if (activeItem.kind === "tab" || activeItem.kind === "tabGroup") {
-            //   console.log('active', activeItem, 'over', overItem)
-            //   // get the index of the over item in that window
-            //   const windowId = (activeItem as (TabItem | GroupItem)).windowId
-            //   const window = getItemFromId(windowId) as WindowItem
-            //   const overTabIndex = overItem.kind === "tab" ? (overItem as TabItem).index : (overItem.children[0] as TabItem).index
-            //   const overIndex = getIndexFromId(over.id, window.children)
-            //   const activeIndex = getIndexFromId(active.id, window.children)
-            //   console.log(overTabIndex)
-            //   if (overIndex > -1 && overTabIndex > -1) {
-            //     // move the tab to the overTabIndex
-            //     if (activeItem.kind === "tab") {
-            //       chrome.tabs.move(active.id as number, { index: overTabIndex })
-            //     }
-            //     else {
-            //       chrome.tabGroups.move(active.id as number, { index: overTabIndex })
-            //     }
-            //     setWindowsData(
-            //       windowsData.map(window => {
-            //         if (window.id === windowId) {
-            //           return {
-            //             ...window,
-            //             children: arrayMove(window.children, activeIndex, overIndex)
-            //           }
-            //         }
-            //         return window
-            //       })
-            //     )
-            //   }
-            // }
           }}
           onDragCancel={() => {
             document.getElementById("windows-container")?.classList.remove("dragging")
