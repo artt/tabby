@@ -9,8 +9,9 @@ import { Window } from './components/Items'
 
 import { data } from './data'
 import { GroupItem, TreeItem, WindowItem } from './types'
-import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, DragOverlay, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { createPortal } from 'react-dom'
 // import { createPortal } from 'react-dom'
 
 export const debugMode = import.meta.env.MODE === "development"
@@ -433,20 +434,20 @@ function App() {
               />
             ))}
           </SortableContext>
-          {/* {createPortal(
+          {createPortal(
             <DragOverlay
               // adjustScale={adjustScale}
               // dropAnimation={dropAnimation}
             >
-              {activeId
+              {/* {activeId
                 ? windows.includes(activeId)
                   ? renderContainerDragOverlay(activeId)
                   : renderSortableItemDragOverlay(activeId)
-                : null}
+                : null} */}
               <div>xxx</div>
             </DragOverlay>,
             document.body
-          )} */}
+          )}
         </DndContext>
       </div>
       <div className="footer-container">
