@@ -394,7 +394,8 @@ function App() {
               if (activeIndexTree.length === 3) {
                 console.log("activeIndexTree has length 3")
                 // need to move into the group of the next tab
-                newGroup = windowsData[activeIndexTree[0]].tabs![newIndex].groupId
+                // if the position in the group is 0, then need to look at the index of the next tab over
+                newGroup = windowsData[activeIndexTree[0]].tabs![newIndex + (activeIndexTree[2] === 0 ? 1 : 0)].groupId
               }
               console.log("newGroup", newGroup)
               chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
