@@ -26,7 +26,7 @@ export const Tab = ({tab, className=""}: TabProps) => {
     transform: CSS.Translate.toString(transform),
     // transform: CSS.Transform.toString(transform),
     // transition: 'transform 0s linear',
-    transition,
+    transition: `${transition}, height .2s ease-in-out`,
   };
 
   function handleClick(event: React.MouseEvent) {

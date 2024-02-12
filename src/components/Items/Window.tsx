@@ -16,7 +16,7 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
   const style = {
     transform: CSS.Translate.toString(transform),
     // transform: CSS.Transform.toString(transform),
-    transition,
+    transition: `${transition}, filter .5s ease-in-out, height .2s ease-in-out`,
   };
 
   return (
@@ -36,7 +36,11 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
           items={window.children.map((item: TreeItem) => item.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div>Window {window.id}</div>
+          <div className='window-title-container'>
+            <div className='window-title-line' />
+            <div className='window-title'>{window.id}</div>
+            <div className='window-title-line' />
+          </div>
           {window.children.map((item: TabItem | GroupItem) => {
             if (item.kind === "tab") {
               return <Tab key={item.id} tab={(item as TabItem)} className={focusedTabs.includes(item.id!) ? "focused" : ""} />

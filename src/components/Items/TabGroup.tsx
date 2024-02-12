@@ -25,12 +25,18 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
     transition,
     isDragging,
   } = useSortable({id: tabGroup.id});
-  
+
   const style = {
     transform: CSS.Translate.toString(transform),
     // transform: CSS.Transform.toString(transform),
-    transition,
+    transition: `${transition}, height .2s ease-in-out`,
   };
+
+  const [numTabsDisplayed, setNumTabsDisplayed] = React.useState(0)
+
+  React.useEffect(() => {
+    setNumTabsDisplayed(focusedTabs.length > 0 ? tabGroup.children.filter(tab => focusedTabs.includes(tab.id!)).length : tabGroup.children.length)
+  }, [focusedTabs, tabGroup.children])
 
   return (
     <div
@@ -53,7 +59,7 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
         <div
           className="tab-group-children"
           style={{
-            height: isDragging ? 0 : `${tabGroup.children.length * 20}px`,
+            height: isDragging ? 0 : `${numTabsDisplayed * 20}px`,
             transition: "height 0.2s",
           }}
         >

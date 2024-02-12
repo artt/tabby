@@ -1,9 +1,34 @@
 .window {
-  padding: 8px 0;
-  border-bottom: 1px solid #ccc;
-  &:last-child {
-    border-bottom: none;
+  padding: 12px 0;
+  // border-bottom: 1px solid #ccc;
+  // &:last-child {
+  //   border-bottom: none;
+  // }
+  &:not(.focused) {
+    filter: blur(1px);
   }
+  &:hover {
+    filter: blur(0px);
+  }
+  transition: filter 0.5s ease-in-out;
+}
+
+.window.focused .window-title {
+  font-weight: bold;
+}
+
+.window-title-container {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--left-space);
+  gap: var(--left-space);
+  margin-bottom: 4px;
+}
+
+.window-title-line {
+  flex-grow: 1;
+  height: 1px;
+  border-bottom: 1px solid #ccc;
 }
 
 .tab {
@@ -67,7 +92,7 @@
     //   border-bottom-left-radius: 4px;
     // }
   }
-  transition: height $height-transition;
+  transition: height $height-transition, margin $height-transition;
 }
 
 #windows-container:not(.dragging) {
@@ -95,5 +120,6 @@
   }
   .tab-group:not(:has(.tab.focused)) {
     height: 0;
+    margin: 0;
   }
 }

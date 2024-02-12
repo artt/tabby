@@ -9,9 +9,8 @@ import { Window } from './components/Items'
 
 import { data } from './data'
 import { GroupItem, TreeItem, WindowItem } from './types'
-import { DndContext, DragOverlay, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
+import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { createPortal } from 'react-dom'
 // import { createPortal } from 'react-dom'
 
 export const debugMode = import.meta.env.MODE === "development"
@@ -20,7 +19,7 @@ function App() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-        activationConstraint: { delay: 50, tolerance: 10 }
+        activationConstraint: { delay: 200, tolerance: 5 }
     })
   )
 
@@ -129,7 +128,10 @@ function App() {
   }, [draggedId])
 
   React.useEffect(() => {
-    if (searchString === "") return
+    if (searchString === "") {
+      setFocusedTabs([])
+      return
+    }
     // populate focusedTabs with tabs that match the search string
     let newFocusedTabs: number[] = []
     windowsData.forEach(window => {
@@ -375,11 +377,8 @@ function App() {
             setWindowsData(tmp)
           }}
           onDragEnd={({active, over}) => {
-            // console.log("dragend", active.id, over?.id)
-            document.getElementById("windows-container")?.classList.remove("dragging")
 
-            // TODO: At this point we need to find the new index of the active item and send the command to chrome
-            // to move the tab to that index
+            document.getElementById("windows-container")?.classList.remove("dragging")
 
             if (!over?.id) return
 
@@ -399,7 +398,10 @@ function App() {
                 newGroup = windowsData[activeIndexTree[0]].tabs![newIndex + (activeIndexTree[2] === 0 ? 1 : 0)].groupId
               }
               console.log("newGroup", newGroup)
-              chrome.tabs.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+              chrome.tabs.move(active.id as number, {
+                index: getWindowsTabIndexFromIndexTree(activeIndexTree),
+                windowId: windowsData[activeIndexTree[0]].id,
+              })
               if (newGroup === -1) {
                 chrome.tabs.ungroup(active.id as number)
               }
@@ -408,7 +410,10 @@ function App() {
               }
             }
             else if (activeItem.kind === "tabGroup") {
-              chrome.tabGroups.move(active.id as number, { index: getWindowsTabIndexFromIndexTree(activeIndexTree) })
+              chrome.tabGroups.move(active.id as number, {
+                index: getWindowsTabIndexFromIndexTree(activeIndexTree),
+                windowId: windowsData[activeIndexTree[0]].id,
+              })
             }
 
           }}
@@ -429,25 +434,25 @@ function App() {
               <Window
                 key={windowData.id}
                 window={windowData}
-                className="window"
+                className={clsx("window", windowData.focused ? "focused" : "")}
                 focusedTabs={focusedTabs}
               />
             ))}
           </SortableContext>
-          {createPortal(
+          {/* {createPortal(
             <DragOverlay
               // adjustScale={adjustScale}
               // dropAnimation={dropAnimation}
             >
-              {/* {activeId
+              {activeId
                 ? windows.includes(activeId)
                   ? renderContainerDragOverlay(activeId)
                   : renderSortableItemDragOverlay(activeId)
-                : null} */}
+                : null}
               <div>xxx</div>
             </DragOverlay>,
             document.body
-          )}
+          )} */}
         </DndContext>
       </div>
       <div className="footer-container">
