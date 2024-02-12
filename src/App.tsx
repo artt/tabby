@@ -20,7 +20,7 @@ function App() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-        activationConstraint: { distance: 4 }
+        activationConstraint: { delay: 50, tolerance: 10 }
     })
   )
 

@@ -48,13 +48,22 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
         <div className="tab-group-title">{tabGroup.title || "​"}</div>
         <div className="tab-close-icon" onClick={e => handleCloseGroup(e, tabGroup)}>✕</div>
       </div>
+      
       {tabGroup.children.length > 0 &&
-        <SortableContext 
-          items={tabGroup.children.map((item: TreeItem) => item.id)}
-          strategy={verticalListSortingStrategy}
+        <div
+          className="tab-group-children"
+          style={{
+            height: isDragging ? 0 : `${tabGroup.children.length * 20}px`,
+            transition: "height 0.2s",
+          }}
         >
-          {tabGroup.children.map((item: TabItem) => <Tab key={item.id} tab={item} className={focusedTabs.includes(item.id!) ? "focused" : ""} />)}
-        </SortableContext>
+          <SortableContext 
+            items={tabGroup.children.map((item: TreeItem) => item.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {tabGroup.children.map((item: TabItem) => <Tab key={item.id} tab={item} className={focusedTabs.includes(item.id!) ? "focused" : ""} />)}
+          </SortableContext>
+        </div>
       }
     </div>
   )
