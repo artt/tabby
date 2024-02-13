@@ -3,7 +3,7 @@ import './style.scss'
 import { Controls } from './components/Controls'
 import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } from './utils'
 import clsx from 'clsx'
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider, useDisclosure } from '@chakra-ui/react'
 import theme from './theme'
 import { Window } from './components/Items'
 
@@ -11,6 +11,7 @@ import { data } from './data'
 import { GroupItem, TreeItem, WindowItem } from './types'
 import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import Settings from './components/Settings'
 // import { createPortal } from 'react-dom'
 
 export const debugMode = import.meta.env.MODE === "development"
@@ -22,6 +23,9 @@ function App() {
         activationConstraint: { delay: 200, tolerance: 1000 }
     })
   )
+
+  const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure()
+
 
   const [rawWindows, setRawWindows] = React.useState<chrome.windows.Window[]>([])
   const [rawTabGroups, setRawTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
@@ -36,6 +40,13 @@ function App() {
 
   const [draggedId, setDraggedId] = React.useState<UniqueIdentifier | null>(null);
 
+  const [settings, setSettings] = React.useState({
+    apiKey: "",
+  })
+
+  function handleSaveSettings() {
+    localStorage.setItem("settings", JSON.stringify(settings))
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
@@ -234,7 +245,8 @@ function App() {
     <ChakraProvider
       theme={theme}
     >
-      <Controls searchString={searchString} setSearchString={setSearchString}/>
+      <Controls searchString={searchString} setSearchString={setSearchString} onSettingsOpen={onSettingsOpen} />
+      <Settings isSettingsOpen={isSettingsOpen} onSettingsClose={onSettingsClose} />
       <div id="windows-container" className={clsx(searchString !== "" && "search-mode")}>
         <DndContext
           sensors={sensors}

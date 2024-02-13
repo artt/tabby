@@ -1,7 +1,7 @@
 import React from "react"
 import OpenAI from "openai"
 import { cleanUrl } from '../../utils'
-import { Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader, DrawerOverlay, FormControl, FormLabel, HStack, IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+import { HStack, IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
 import { useDisclosure } from '@chakra-ui/react'
 
 // import { HamburgerIcon } from "./icons"
@@ -11,7 +11,6 @@ import { ImUngroup } from "react-icons/im";
 import { MdOutlineDeleteSweep } from "react-icons/md";
 import { FaSortAmountDownAlt } from "react-icons/fa";
 import { FaCog } from "react-icons/fa";
-import { TbEye, TbEyeClosed } from "react-icons/tb";
 
 import "./style.scss"
 
@@ -117,11 +116,9 @@ async function sort() {
 
 }
 
-export function Controls({searchString, setSearchString}: {searchString: string, setSearchString: React.Dispatch<React.SetStateAction<string>>}) {
+export function Controls({searchString, setSearchString, onSettingsOpen}: {searchString: string, setSearchString: React.Dispatch<React.SetStateAction<string>>, onSettingsOpen: () => void}) {
 
   const { isOpen: isMenuOpen, onOpen: onMenuOpen, onClose: onMenuClose } = useDisclosure()
-  const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure()
-  const [showKey, setShowKey] = React.useState(false)
 
   function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
     setSearchString(event.target.value)
@@ -194,36 +191,6 @@ export function Controls({searchString, setSearchString}: {searchString: string,
           </HStack>
         </InputRightElement>
       </InputGroup>
-      <Drawer
-        isOpen={isSettingsOpen}
-        placement="top"
-        onClose={onSettingsClose}
-      >
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>Settings</DrawerHeader>
-          <DrawerBody>
-            <FormControl>
-              <FormLabel>OpenAI API Key</FormLabel>
-              <InputGroup>
-                <Input
-                  type={showKey ? 'text' : 'password'}
-                  placeholder='OpenAI API Key'
-                />
-                <InputRightElement>
-                  <IconButton
-                    aria-label='Show API Key'
-                    icon={showKey ? <TbEye /> : <TbEyeClosed />}
-                    variant='ghost'
-                    onClick={() => setShowKey(!showKey)}
-                  />
-                </InputRightElement>
-              </InputGroup>
-            </FormControl>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
     </div>
   )
 }
