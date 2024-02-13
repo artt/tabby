@@ -1,7 +1,7 @@
 import React from "react"
 import OpenAI from "openai"
 import { cleanUrl } from '../../utils'
-import { IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+import { Drawer, DrawerBody, DrawerCloseButton, DrawerContent, DrawerHeader, DrawerOverlay, FormControl, FormLabel, HStack, IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
 import { useDisclosure } from '@chakra-ui/react'
 
 // import { HamburgerIcon } from "./icons"
@@ -10,6 +10,8 @@ import { ImMakeGroup } from "react-icons/im";
 import { ImUngroup } from "react-icons/im";
 import { MdOutlineDeleteSweep } from "react-icons/md";
 import { FaSortAmountDownAlt } from "react-icons/fa";
+import { FaCog } from "react-icons/fa";
+import { TbEye, TbEyeClosed } from "react-icons/tb";
 
 import "./style.scss"
 
@@ -117,7 +119,9 @@ async function sort() {
 
 export function Controls({searchString, setSearchString}: {searchString: string, setSearchString: React.Dispatch<React.SetStateAction<string>>}) {
 
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isMenuOpen, onOpen: onMenuOpen, onClose: onMenuClose } = useDisclosure()
+  const { isOpen: isSettingsOpen, onOpen: onSettingsOpen, onClose: onSettingsClose } = useDisclosure()
+  const [showKey, setShowKey] = React.useState(false)
 
   function handleSearch(event: React.ChangeEvent<HTMLInputElement>) {
     setSearchString(event.target.value)
@@ -127,16 +131,16 @@ export function Controls({searchString, setSearchString}: {searchString: string,
   React.useEffect(() => {
     function handleBlur(e: FocusEvent) {
       if (e.target === window) {
-        onClose()
+        onMenuClose()
       }
     }
     window.addEventListener("blur", handleBlur)
     return () => {window.removeEventListener("blur", handleBlur)}
-  }, [onClose])
+  }, [onMenuClose])
 
   return(
     <div className="controls-container">
-      <InputGroup>
+      <InputGroup size='lg'>
         <Input
           id="search-bar"
           placeholder='Search'
@@ -151,35 +155,75 @@ export function Controls({searchString, setSearchString}: {searchString: string,
             e.target.select()
           }}
           pl="var(--left-space)"
-          pr='2rem'
+          pr='calc(2*var(--input-height))'
         />
         <InputRightElement>
-          <Menu isOpen={isOpen} onOpen={onOpen} onClose={onClose}>
-            <MenuButton
-              as={IconButton}
-              aria-label='Commands'
-              icon={<GiHamburgerMenu />}
+          <HStack spacing={0} mr={16}>
+            <Menu isOpen={isMenuOpen} onOpen={onMenuOpen} onClose={onMenuClose}>
+              <MenuButton
+                as={IconButton}
+                aria-label='Commands'
+                icon={<GiHamburgerMenu />}
+                variant='ghost'
+                isRound
+              />
+              <MenuList display={isMenuOpen ? "block" : "none"}>
+
+                <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={group}>
+                  Group tabs
+                </MenuItem>
+                <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>
+                  Ungroup tabs
+                </MenuItem>
+                <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
+                  Remove duplicate tabs
+                </MenuItem>
+                <MenuItem icon={<FaSortAmountDownAlt />} command='⌘S' onClick={sort}>
+                  Sort tabs by URL
+                </MenuItem>
+
+              </MenuList>
+            </Menu>
+            <IconButton
+              icon={<FaCog />}
+              aria-label='Settings'
               variant='ghost'
-              size='sm'
               isRound
+              onClick={onSettingsOpen}
             />
-            <MenuList display={isOpen ? "block" : "none"}>
-              <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={group}>
-                Group tabs
-              </MenuItem>
-              <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>
-                Ungroup tabs
-              </MenuItem>
-              <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
-                Remove duplicate tabs
-              </MenuItem>
-              <MenuItem icon={<FaSortAmountDownAlt />} command='⌘S' onClick={sort}>
-                Sort tabs by URL
-              </MenuItem>
-            </MenuList>
-          </Menu>
+          </HStack>
         </InputRightElement>
       </InputGroup>
+      <Drawer
+        isOpen={isSettingsOpen}
+        placement="top"
+        onClose={onSettingsClose}
+      >
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>Settings</DrawerHeader>
+          <DrawerBody>
+            <FormControl>
+              <FormLabel>OpenAI API Key</FormLabel>
+              <InputGroup>
+                <Input
+                  type={showKey ? 'text' : 'password'}
+                  placeholder='OpenAI API Key'
+                />
+                <InputRightElement>
+                  <IconButton
+                    aria-label='Show API Key'
+                    icon={showKey ? <TbEye /> : <TbEyeClosed />}
+                    variant='ghost'
+                    onClick={() => setShowKey(!showKey)}
+                  />
+                </InputRightElement>
+              </InputGroup>
+            </FormControl>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
