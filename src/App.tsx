@@ -19,7 +19,7 @@ function App() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-        activationConstraint: { delay: 200, tolerance: 5 }
+        activationConstraint: { delay: 200, tolerance: 1000 }
     })
   )
 
@@ -78,6 +78,8 @@ function App() {
       chrome.tabGroups.onMoved.addListener((group) => handleEvent("groupMoved", {group}));
       chrome.tabGroups.onRemoved.addListener((group) => handleEvent("groupRemoved", {group}));
       chrome.tabGroups.onUpdated.addListener((group) => handleEvent("groupUpdated", {group}));
+      chrome.windows.onCreated.addListener((window) => handleEvent("windowCreated", {window}));
+      chrome.windows.onFocusChanged.addListener((windowId) => handleEvent("focusChanged", {windowId}));
       handleEvent("init", {})
     }
 
@@ -410,9 +412,12 @@ function App() {
               }
             }
             else if (activeItem.kind === "tabGroup") {
+              const currentWindowId = (activeItem as GroupItem).windowId
+              const newWindowId = windowsData[activeIndexTree[0]].id
               chrome.tabGroups.move(active.id as number, {
                 index: getWindowsTabIndexFromIndexTree(activeIndexTree),
-                windowId: windowsData[activeIndexTree[0]].id,
+                // for some reason if the windowId is the same then there'd be error // TODO: report this?
+                ...(currentWindowId !== newWindowId && {windowId: windowsData[activeIndexTree[0]].id}),
               })
             }
 

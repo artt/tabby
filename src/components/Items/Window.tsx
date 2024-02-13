@@ -16,7 +16,7 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
   const style = {
     transform: CSS.Translate.toString(transform),
     // transform: CSS.Transform.toString(transform),
-    transition: `${transition}, filter .5s ease-in-out, height .2s ease-in-out`,
+    transition: `${transition}, opacity .5s ease-in-out, height .2s ease-in-out`,
   };
 
   return (
