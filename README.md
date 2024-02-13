@@ -1,7 +1,8 @@
 # To-do's
 
 - [ ] Add settings screen (specifically to input API key)... other things might include dark mode settings, etc.
-- [ ] Drag and drop
+- [x] Drag and drop
+- [ ] Advanced drag and drop
 - [ ] Status bar
 - [ ] Highlight matched terms when searching
 - [x] Dark mode
