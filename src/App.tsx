@@ -12,6 +12,7 @@ import { GroupItem, TreeItem, WindowItem } from './types'
 import { DndContext, PointerSensor, UniqueIdentifier, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import Settings from './components/Settings'
+import Footer from './components/Footer'
 // import { createPortal } from 'react-dom'
 
 export const debugMode = import.meta.env.MODE === "development"
@@ -487,9 +488,7 @@ function App() {
           )} */}
         </DndContext>
       </div>
-      <div className="footer-container">
-        {`Managing ${numTabs} tab${numTabs === 1 ? "" : "s"} in ${rawWindows.length} window${rawWindows.length === 1 ? "" : "s"}`}
-      </div>
+      <Footer numTabs={numTabs} rawWindows={rawWindows} onSettingsOpen={onSettingsOpen} />
     </ChakraProvider>
   )
 }

@@ -1,7 +1,7 @@
 import React from "react"
 import OpenAI from "openai"
 import { cleanUrl } from '../../utils'
-import { HStack, IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
+import { IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
 import { useDisclosure } from '@chakra-ui/react'
 
 // import { HamburgerIcon } from "./icons"
@@ -10,7 +10,6 @@ import { ImMakeGroup } from "react-icons/im";
 import { ImUngroup } from "react-icons/im";
 import { MdOutlineDeleteSweep } from "react-icons/md";
 import { FaSortAmountDownAlt } from "react-icons/fa";
-import { FaCog } from "react-icons/fa";
 
 import "./style.scss"
 
@@ -123,7 +122,7 @@ type ControlsProps = {
   apiKey: string
 }
 
-export function Controls({ searchString, setSearchString, onSettingsOpen, apiKey }: ControlsProps) {
+export function Controls({ searchString, setSearchString, apiKey }: ControlsProps) {
 
   const { isOpen: isMenuOpen, onOpen: onMenuOpen, onClose: onMenuClose } = useDisclosure()
 
@@ -162,40 +161,31 @@ export function Controls({ searchString, setSearchString, onSettingsOpen, apiKey
           pr='calc(2*var(--input-height))'
         />
         <InputRightElement>
-          <HStack spacing={0} mr={16}>
-            <Menu isOpen={isMenuOpen} onOpen={onMenuOpen} onClose={onMenuClose}>
-              <MenuButton
-                as={IconButton}
-                aria-label='Commands'
-                icon={<GiHamburgerMenu />}
-                variant='ghost'
-                isRound
-              />
-              <MenuList display={isMenuOpen ? "block" : "none"}>
-
-                <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={() => group(apiKey)}>
-                  Group tabs
-                </MenuItem>
-                <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>
-                  Ungroup tabs
-                </MenuItem>
-                <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
-                  Remove duplicate tabs
-                </MenuItem>
-                <MenuItem icon={<FaSortAmountDownAlt />} command='⌘S' onClick={sort}>
-                  Sort tabs by URL
-                </MenuItem>
-
-              </MenuList>
-            </Menu>
-            <IconButton
-              icon={<FaCog />}
-              aria-label='Settings'
+          <Menu isOpen={isMenuOpen} onOpen={onMenuOpen} onClose={onMenuClose}>
+            <MenuButton
+              as={IconButton}
+              aria-label='Commands'
+              icon={<GiHamburgerMenu />}
               variant='ghost'
               isRound
-              onClick={onSettingsOpen}
             />
-          </HStack>
+            <MenuList display={isMenuOpen ? "block" : "none"}>
+
+              <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={() => group(apiKey)}>
+                Group tabs
+              </MenuItem>
+              <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>
+                Ungroup tabs
+              </MenuItem>
+              <MenuItem icon={<MdOutlineDeleteSweep />} command='⌘D' onClick={deduplicate}>
+                Remove duplicate tabs
+              </MenuItem>
+              <MenuItem icon={<FaSortAmountDownAlt />} command='⌘S' onClick={sort}>
+                Sort tabs by URL
+              </MenuItem>
+
+            </MenuList>
+          </Menu>
         </InputRightElement>
       </InputGroup>
     </div>

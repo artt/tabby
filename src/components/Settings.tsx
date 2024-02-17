@@ -35,7 +35,7 @@ export default function Settings({isSettingsOpen, onSettingsClose, apiKey, setAp
 
     <Drawer
       isOpen={isSettingsOpen}
-      placement="top"
+      placement="bottom"
       onClose={handleClose}
     >
       <DrawerOverlay />
