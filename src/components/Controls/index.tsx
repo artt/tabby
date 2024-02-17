@@ -14,7 +14,7 @@ import { FaCog } from "react-icons/fa";
 
 import "./style.scss"
 
-async function group() {
+async function group(apiKey: string) {
   console.log("Grouping current window...")
   const window = await chrome.windows.getCurrent({populate: true})
   console.log(window)
@@ -25,7 +25,7 @@ async function group() {
   const tabIds = window.tabs!.map(tab => tab.id!)
 
   const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    apiKey: apiKey, // import.meta.env.VITE_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   })
   console.log("allTabs:", allTabs)
@@ -116,7 +116,14 @@ async function sort() {
 
 }
 
-export function Controls({searchString, setSearchString, onSettingsOpen}: {searchString: string, setSearchString: React.Dispatch<React.SetStateAction<string>>, onSettingsOpen: () => void}) {
+type ControlsProps = {
+  searchString: string
+  setSearchString: React.Dispatch<React.SetStateAction<string>>
+  onSettingsOpen: () => void
+  apiKey: string
+}
+
+export function Controls({ searchString, setSearchString, onSettingsOpen, apiKey }: ControlsProps) {
 
   const { isOpen: isMenuOpen, onOpen: onMenuOpen, onClose: onMenuClose } = useDisclosure()
 
@@ -166,7 +173,7 @@ export function Controls({searchString, setSearchString, onSettingsOpen}: {searc
               />
               <MenuList display={isMenuOpen ? "block" : "none"}>
 
-                <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={group}>
+                <MenuItem icon={<ImMakeGroup />} command='⌘G' onClick={() => group(apiKey)}>
                   Group tabs
                 </MenuItem>
                 <MenuItem icon={<ImUngroup />} command='⌘U' onClick={ungroup}>

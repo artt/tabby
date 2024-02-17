@@ -40,13 +40,14 @@ function App() {
 
   const [draggedId, setDraggedId] = React.useState<UniqueIdentifier | null>(null);
 
-  const [settings, setSettings] = React.useState({
-    apiKey: "",
-  })
+  // const [settings, setSettings] = React.useState({})
 
-  function handleSaveSettings() {
-    localStorage.setItem("settings", JSON.stringify(settings))
-  }
+  const [apiKey, setApiKey] = React.useState(localStorage.getItem("apiKey") || "")
+
+  React.useEffect(() => {
+    console.log(apiKey)
+    localStorage.setItem("apiKey", apiKey)
+  }, [apiKey])
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function handleEvent(_name: string, _payload: object) {
@@ -93,6 +94,9 @@ function App() {
       chrome.windows.onFocusChanged.addListener((windowId) => handleEvent("focusChanged", {windowId}));
       handleEvent("init", {})
     }
+
+    // load settings
+    // setSettings(JSON.parse(localStorage.getItem("settings") || "{}"))
 
     document.body.addEventListener("click", handleAppClick)
     return () => {
@@ -245,8 +249,20 @@ function App() {
     <ChakraProvider
       theme={theme}
     >
-      <Controls searchString={searchString} setSearchString={setSearchString} onSettingsOpen={onSettingsOpen} />
-      <Settings isSettingsOpen={isSettingsOpen} onSettingsClose={onSettingsClose} />
+      <Controls
+        searchString={searchString}
+        setSearchString={setSearchString}
+        onSettingsOpen={onSettingsOpen}
+        apiKey={apiKey}
+      />
+      <Settings
+        isSettingsOpen={isSettingsOpen}
+        onSettingsClose={onSettingsClose}
+        // settings={settings}
+        // setSettings={setSettings}
+        apiKey={apiKey}
+        setApiKey={setApiKey}
+      />
       <div id="windows-container" className={clsx(searchString !== "" && "search-mode")}>
         <DndContext
           sensors={sensors}
@@ -259,7 +275,6 @@ function App() {
 
             if (!over?.id) return
             if (active.id === over.id) return
-
 
             const activeIndexTree = getIndexTreeFromId(active.id)
             const overIndexTree = getIndexTreeFromId(over.id)

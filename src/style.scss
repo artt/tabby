@@ -1,7 +1,8 @@
 $height-transition: 0.2s ease-in-out;
 
 #root {
-  --controls-height: 60px;
+  --controls-height: 36px;
+  --footer-height: 36px;
   --tab-height: 20px;
   --left-space: 10px;
 }
@@ -81,7 +82,7 @@ body {
 }
 
 .footer-container {
-  height: 50px;
+  flex: 0 0 var(--footer-height);
   padding: 0 var(--left-space);
   background-color: rgb(from var(--text-color) r g b / 10%);
   display: flex;
