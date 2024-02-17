@@ -13,3 +13,5 @@
 - [ ] More tab info like mute status, etc.
 - [ ] Network view?
 - [ ] Click to rename group
+- [ ] Sort by most recently active tab
+- [ ] Show thumbnail of tabs
