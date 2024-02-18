@@ -1,6 +1,6 @@
 import React from "react"
 import OpenAI from "openai"
-import { cleanUrl } from '../../utils'
+import { processTabsForOpenAi } from '../../utils'
 import { IconButton, Input, InputGroup, InputRightElement, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react"
 import { useDisclosure } from '@chakra-ui/react'
 
@@ -17,10 +17,7 @@ async function group(apiKey: string) {
   console.log("Grouping current window...")
   const window = await chrome.windows.getCurrent({populate: true})
   console.log(window)
-  const allTabs = window.tabs!.map(tab => ({
-    title: tab.title || "",
-    url: cleanUrl(tab.url) || "",
-  }))
+  const allTabs = processTabsForOpenAi(window.tabs!)
   const tabIds = window.tabs!.map(tab => tab.id!)
 
   const openai = new OpenAI({
@@ -31,7 +28,7 @@ async function group(apiKey: string) {
   console.log("tabIds:", tabIds)
   console.log("Making call to OpenAI...")
   const res = await openai.chat.completions.create({
-    // model: "gpt-3.5-turbo-0125",
+    // model: "gpt-3.5-turbo-1106",
     model: "gpt-4-0125-preview",
     response_format: { "type": "json_object" },
     messages: [
@@ -39,11 +36,13 @@ async function group(apiKey: string) {
         role: "system",
         content: [
           `You help people manage their tabs by grouping the tabs by their topics.`,
-          `You will be provided with an array of object: {title, url}.`,
-          `Each item in the array is identified by its zero-based index.`,
-          `Given this array, group them into logical groups based on the content inferred from titles and URLs, not just the domain name.`,
-          `The output should be a JSON object with key "groups" whose value is an array of objects with keys "title" which specifies the tab group's name, and "tabIds" which is an array of tab IDs in respective groups.`,
-          `Items that don't belong to any group should be left out.`,
+          `You will be provided with an array of object: {id, title, url} which contains the tab's ID, title, and domain/subdomain.`,
+          `The URL field could be empty.`,
+          `Please group them into logical groups based on titles and domain/subdomains.`,
+          `The output should be a JSON object with a single key, "groups".`,
+          `The value of that key is an array of objects with keys "title" which specifies the tab group's name, and "tabIds" which is an array of tab's IDs in each group.`,
+          `Items that don't belong to any group should be in its own group named "Others".`,
+          `Make sure each tab is assigned to exactly one group.`,
         ].join(' '),
       },
       {
