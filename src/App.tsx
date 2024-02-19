@@ -99,6 +99,9 @@ function App() {
     // load settings
     // setSettings(JSON.parse(localStorage.getItem("settings") || "{}"))
 
+    // set focus on search bar when app is loaded
+    // setTimeout(handleAppClick, 1000)
+
     document.body.addEventListener("click", handleAppClick)
     return () => {
       document.body.removeEventListener("click", handleAppClick)
@@ -108,8 +111,7 @@ function App() {
 
   function handleAppClick() {
     // focus on search bar element
-    const searchBar = document.getElementById("search-bar")
-    if (searchBar) searchBar.focus()
+    document.getElementById("search-bar")?.focus()
   }
 
   

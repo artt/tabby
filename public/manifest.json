@@ -15,6 +15,14 @@
     "default_path": "index.html",
     "openPanelOnActionClick": true
   },
+  "action": {},
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+O"
+      }
+    }
+  },
   "permissions": [
     "tabs",
     "tabGroups",

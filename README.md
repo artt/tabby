@@ -15,3 +15,4 @@
 - [ ] Click to rename group
 - [ ] Sort by most recently active tab
 - [ ] Show thumbnail of tabs
+- [ ] Collapse groups / windows
