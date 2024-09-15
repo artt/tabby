@@ -86,11 +86,26 @@ async function deduplicate() {
 }
 
 function sortTabs(a: chrome.tabs.Tab, b: chrome.tabs.Tab) {
-  if (!a.url) return 1
-  if (!b.url) return -1
-  if (a.url < b.url) return -1
-  if (a.url > b.url) return 1
+  // sort by the last part of the hostname first, then second to last, etc.
+  // then by path
+  const aUrl = new URL(a.url!)
+  const bUrl = new URL(b.url!)
+  const aParts = aUrl.hostname.split('.').reverse()
+  const bParts = bUrl.hostname.split('.').reverse()
+  for (let i = 0; i < Math.min(aParts.length, bParts.length); i++) {
+    if (aParts[i] < bParts[i]) return -1
+    if (aParts[i] > bParts[i]) return 1
+  }
+  if (aParts.length < bParts.length) return -1
+  if (aParts.length > bParts.length) return 1
+  if (aUrl.pathname < bUrl.pathname) return -1
+  if (aUrl.pathname > bUrl.pathname) return 1
   return 0
+  // if (!a.url) return 1
+  // if (!b.url) return -1
+  // if (a.url < b.url) return -1
+  // if (a.url > b.url) return 1
+  // return 0
 }
 
 async function sort() {

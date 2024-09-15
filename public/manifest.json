@@ -27,6 +27,7 @@
     "tabs",
     "tabGroups",
     "sidePanel",
-    "favicon"
+    "favicon",
+    "contextMenus"
   ]
 }
