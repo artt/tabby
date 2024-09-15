@@ -6,8 +6,8 @@ chrome.action.onClicked.addListener((tab) => {
     target: {tabId: tab.id},
     func: contentScriptFunc,
     args: ['action'],
-  });
-});
+  })
+})
 
 function contentScriptFunc(name) {
   alert(`"${name}" executed`);
@@ -15,4 +15,4 @@ function contentScriptFunc(name) {
 
 chrome.commands.onCommand.addListener((command) => {
   console.log(`Command: ${command}`);
-});
+})
