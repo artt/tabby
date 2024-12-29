@@ -1,6 +1,6 @@
 # Tabby
 
-![Tabby](./public/images/icon-128.png)
+![Tabby](./public/images/icon-large.png)
 
 Tabby is a Chrome extension that helps you manage your tabs.
 It allows you to group tabs together using OpenAI (BYOK), search for tabs, and drag and drop tabs between groups.
