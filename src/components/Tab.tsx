@@ -1,3 +1,4 @@
+import { getFavIconUrl } from "@/lib/utils"
 import { TabItem } from "@/types"
 
 type TabProps = {
@@ -22,9 +23,10 @@ type TabProps = {
 
 
 export const Tab = ({tab, className=""}: TabProps) => {
+  console.log(tab)
   return (
     <div className="flex items-center h-[--tab-height] px-[--left-space] transition-height">
-      <img className="w-4 h-4" src={tab.favIconUrl || undefined} alt="" />
+      <img className="w-4 h-4" src={tab.favIconUrl || getFavIconUrl(tab.url || "") || undefined} alt="" />
       <div className="mx-2 overflow-hidden text-ellipsis whitespace-nowrap cursor-default">{tab.title}</div>
       <div className="ml-auto cursor-pointer" onClick={() => {}}>✕</div>
     </div>
