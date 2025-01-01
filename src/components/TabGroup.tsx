@@ -1,4 +1,4 @@
-import { GroupItem } from "@/types"
+import { GroupItem, TabItem } from "@/types"
 
 type TabGroupProps = {
   tabGroup: GroupItem,
@@ -8,8 +8,15 @@ type TabGroupProps = {
 
 export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) => {
   return (
-    <div>
+    <div className="pl-[--left-space]">
       {tabGroup.title}
+      {tabGroup.children.map((item: TabItem) => (
+        <Tab
+          key={item.id}
+          tab={item}
+          className={focusedTabs.includes(item.id!) ? "focused" : ""}
+        />
+      ))}
     </div>
   )
 }

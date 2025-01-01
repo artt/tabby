@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+#root {
+  --controls-height: 36px;
+  --footer-height: 36px;
+  --tab-height: 20px;
+  --left-space: 10px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

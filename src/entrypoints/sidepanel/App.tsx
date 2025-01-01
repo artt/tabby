@@ -68,8 +68,7 @@ function App() {
   }, [])
 
   return (
-    <>
-      <div>xxx</div>
+    <div>
       {windowsData.map(windowData => (
         <Window
           key={windowData.id}
@@ -78,7 +77,7 @@ function App() {
           focusedTabs={[]} // just a placeholder
         />
       ))}
-    </>
+    </div>
   );
 }
 

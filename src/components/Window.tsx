@@ -13,7 +13,7 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
 
   return (
     <div>
-      <div>
+      <div className="text-center font-bold">
         {window.id}
       </div>
       {window.children.map((item: TabItem | GroupItem) => {
