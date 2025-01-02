@@ -12,7 +12,7 @@ export function Window({window, focusedTabs, className}: {window: WindowItem, fo
   }
 
   return (
-    <div>
+    <div className="my-2">
       <div className="text-center font-bold">
         {window.id}
       </div>

@@ -69,7 +69,7 @@ function App() {
   }, [])
 
   return (
-    <div id="main">
+    <div id="main" className="">
       {windowsData.map(windowData => (
         <Window
           key={windowData.id}

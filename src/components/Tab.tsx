@@ -23,7 +23,7 @@ export const Tab = ({tab, className=""}: TabProps) => {
   return (
     <div
       className={cn(
-        "tab flex items-center h-[--tab-height] px-[--left-space] transition-height",
+        "tab relative flex items-center h-[--tab-height] px-[--left-space] transition-height",
         className,
         tab.active ? "active": "",
       )}
@@ -32,7 +32,7 @@ export const Tab = ({tab, className=""}: TabProps) => {
       <img className="w-4 h-4" src={tab.favIconUrl || getFavIconUrl(tab.url || "") || undefined} alt="" />
       <div className="mx-2 overflow-hidden text-ellipsis whitespace-nowrap cursor-default">{tab.title}</div>
       <div
-        className="tab-close-button ml-auto cursor-pointer font-bold hidden opacity-30"
+        className="close-button ml-auto cursor-pointer font-bold hidden opacity-30"
         onClick={handleClose}
       >
         ✕
