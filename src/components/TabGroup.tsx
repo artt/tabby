@@ -18,6 +18,7 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
       className="tab-group my-2"
       style={{
         "--color": `var(--${tabGroup.color})`,
+        backgroundColor: `color-mix(in srgb, var(--color), transparent 92%)`,
       } as React.CSSProperties}
     >
       <div className="tab-group-title flex items-center px-[--left-space] bg-[--color] font-bold text-background">
