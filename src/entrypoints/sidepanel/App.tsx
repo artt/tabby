@@ -4,22 +4,34 @@ import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } 
 import { Input } from "@/components/ui/input"
 import { WindowItem } from '@/types';
 import { Window } from '@/components/Window';
+import {DndContext} from '@dnd-kit/core';
 import '@/components/style.scss'
+import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 
 function App() {
 
   const [rawWindows, setRawWindows] = React.useState<chrome.windows.Window[]>([])
   const [rawTabGroups, setRawTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
   const [windowsData, setWindowsData] = React.useState<WindowItem[]>([])
+  const settings = {
+    showIncognitoWindows: false,
+  }
+
+  // const { sensors } = useDndKit()
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+        activationConstraint: { delay: 200, tolerance: 1000 }
+    })
+  )
 
   function handleEvent(_name: string, _payload: object) {
     chrome.windows.getAll({ populate: true }).then(res => setRawWindows(res))
     chrome.tabGroups.query({}).then(res => setRawTabGroups(res))
   }
 
-  React.useEffect(() => {
-    console.log(windowsData)
-  }, [windowsData])
+  // React.useEffect(() => {
+  //   console.log(windowsData)
+  // }, [windowsData])
 
   React.useEffect(() => {
     // setNumTabs(rawWindows.map(window => window.tabs?.length ?? 0).reduce((a, b) => a + b, 0))
@@ -70,14 +82,18 @@ function App() {
 
   return (
     <div id="main" className="">
-      {windowsData.map(windowData => (
-        <Window
-          key={windowData.id}
-          window={windowData}
-          // className={clsx("window", windowData.focused ? "focused" : "")}
-          focusedTabs={[]} // just a placeholder
-        />
-      ))}
+      <DndContext
+        sensors={sensors}
+      >
+        {windowsData.map(windowData => (!windowData.incognito || settings.showIncognitoWindows) && (
+          <Window
+            key={windowData.id}
+            window={windowData}
+            // className={clsx("window", windowData.focused ? "focused" : "")}
+            focusedTabs={[]} // just a placeholder
+          />
+        ))}
+      </DndContext>
     </div>
   );
 }
