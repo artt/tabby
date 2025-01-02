@@ -1,0 +1,21 @@
+@use 'sass:color';
+
+#main {
+  --color-tab-hover: color-mix(in srgb, hsl(var(--foreground)), transparent 85%);
+  --color-tab-focused: color-mix(in srgb, yellow, transparent 70%);
+}
+
+.tab {
+  &.active {
+    background-color: var(--color-tab-focused);
+  }
+  &:hover {
+    background-color: var(--color-tab-hover);
+    .tab-close-button {
+      display: block;
+    }
+  }
+  .tab-close-button:hover {
+    opacity: 1;
+  }
+}

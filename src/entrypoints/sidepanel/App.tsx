@@ -4,6 +4,7 @@ import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } 
 import { Input } from "@/components/ui/input"
 import { WindowItem } from '@/types';
 import { Window } from '@/components/Window';
+import '@/components/style.scss'
 
 function App() {
 
@@ -68,7 +69,7 @@ function App() {
   }, [])
 
   return (
-    <div>
+    <div id="main">
       {windowsData.map(windowData => (
         <Window
           key={windowData.id}

@@ -30,7 +30,7 @@ export function addWindowsAndTabsListeners(handleEvent: (_name: string, _payload
 
 function updateTheme(isDark: boolean) {
   const root = window.document.documentElement
-  const darkThemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+  root.classList.remove("dark", "light")
   if (isDark) {
     root.classList.add("dark")
   } else {
