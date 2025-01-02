@@ -37,7 +37,7 @@
 }
 
 .tab-group {
-  > .tab {
+  .tab {
     &::before {
       content: '';
       position: absolute;
@@ -51,10 +51,14 @@
 }
 
 .tab {
-  &:hover {
+  #main:not(.dragging) &:hover {
     background-color: var(--color-tab-hover);
   }
   &.active {
     background-color: var(--color-tab-focused);
   }
+}
+
+.dragging {
+  cursor: grabbing;
 }
