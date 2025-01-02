@@ -2,6 +2,7 @@ import { cn, getFavIconUrl } from "@/lib/utils"
 import { TabItem } from "@/types"
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from '@dnd-kit/utilities';
+import React from "react";
 
 type TabProps = {
   tab: TabItem,
@@ -38,13 +39,18 @@ export const Tab = ({tab, className=""}: TabProps) => {
     chrome.tabs.remove(tab.id!)
   }
 
+  React.useEffect(() => {
+    console.log('dragging', isDragging)
+  }, [isDragging])
+
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "tab relative flex items-center h-[--tab-height] px-[--left-space] transition-height",
+        "tab flex items-center h-[--tab-height] px-[--left-space] transition-height",
         className,
         tab.active ? "active": "",
+        // isDragging ? "cursor-grabbing" : "",
       )}
       style={{...style, opacity: isDragging ? 0.5 : 1}}
       onClick={handleClick}
@@ -52,9 +58,9 @@ export const Tab = ({tab, className=""}: TabProps) => {
       {...listeners}
     >
       <img className="w-4 h-4" src={tab.favIconUrl || getFavIconUrl(tab.url || "") || undefined} alt="" />
-      <div className="mx-2 overflow-hidden text-ellipsis whitespace-nowrap cursor-default">{tab.title}</div>
+      <div className="mx-2 overflow-hidden text-ellipsis whitespace-nowrap">{tab.title}</div>
       <div
-        className="close-button ml-auto cursor-pointer font-bold hidden opacity-30"
+        className="close-button ml-auto font-bold hidden opacity-30"
         onClick={handleClose}
       >
         ✕

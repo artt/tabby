@@ -3,12 +3,13 @@ import { addWindowsAndTabsListeners, addMediaQueryListener } from '@/lib/listene
 import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } from '@/lib/process'
 import { Input } from "@/components/ui/input"
 import { GroupItem, TreeItem, WindowItem } from '@/types';
-import { getIndexTreeFromId, getItemFromId, getWindowsTabIndexFromIndexTree, moveItem } from '@/lib/dnd';
+import { getIndexTreeFromId, getItemFromId, getWindowsTabIndexFromIndexTree, moveItem, onDragEnd, onDragOver } from '@/lib/dnd';
 import { Window } from '@/components/Window';
 import {DndContext, UniqueIdentifier} from '@dnd-kit/core';
 import '@/components/style.scss'
 import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove } from '@dnd-kit/sortable';
+import Top from '@/components/Top';
 
 function App() {
 
@@ -87,93 +88,44 @@ function App() {
   }, [])
 
   return (
-    <div id="main" className="">
-      <DndContext
-        sensors={sensors}
-        onDragStart={({ active }) => {
-          document.getElementById("main")?.classList.add("dragging")
-          setDraggedId(active.id)
-        }}
-        // when everything is said and done, sync changes to the browser
-        onDragEnd={({ active, over }) => {
-          // console.log("drag end:", active, over)
-          document.getElementById("main")?.classList.remove("dragging")
-          if (!over?.id) return
-          const activeItem = getItemFromId(active.id, windowsData)
-          if (activeItem.kind === "window") return
-          const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
-          if (activeItem.kind === "tab") {
-            const newIndex = getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData)
-            let newGroup = -1
-            if (activeIndexTree.length === 3) {
-              console.log("activeIndexTree has length 3")
-              // need to move into the group of the next tab
-              // if the position in the group is 0, then need to look at the index of the next tab over
-              newGroup = windowsData[activeIndexTree[0]].tabs![newIndex + (activeIndexTree[2] === 0 ? 1 : 0)].groupId
+    <div>
+      <Top />
+      <div id="main" className="">
+        <DndContext
+          sensors={sensors}
+          autoScroll={false}
+          onDragStart={({ active }) => {
+            document.getElementById("main")?.classList.add("dragging")
+            setDraggedId(active.id)
+            setBackupWindowsData(windowsData)
+          }}
+          // when everything is said and done, sync changes to the browser
+          onDragEnd={({ active, over }) => onDragEnd(active, over, windowsData)}
+          // gets called when the dragged item is over another item
+          // responsible for updating the UI
+          onDragOver={({ active, over }) => onDragOver(active, over, windowsData, setWindowsData)}
+          // gets called when the drag is cancelled
+          // we just restore the original order
+          onDragCancel={({ active }) => {
+            console.log("drag cancel:", active)
+            document.getElementById("main")?.classList.remove("dragging")
+            if (backupWindowsData) {
+              setWindowsData(backupWindowsData)
             }
-            console.log("newGroup", newGroup)
-            chrome.tabs.move(active.id as number, {
-              index: getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData),
-              windowId: windowsData[activeIndexTree[0]].id,
-            })
-            if (newGroup === -1) {
-              chrome.tabs.ungroup(active.id as number)
-            }
-            else {
-              chrome.tabs.group({ tabIds: active.id as number, groupId: newGroup })
-            }
-          }
-          else if (activeItem.kind === "tabGroup") {
-            const currentWindowId = (activeItem as GroupItem).windowId
-            const newWindowId = windowsData[activeIndexTree[0]].id
-            chrome.tabGroups.move(active.id as number, {
-              index: getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData),
-              // for some reason if the windowId is the same then there'd be error // TODO: report this?
-              ...(currentWindowId !== newWindowId && {windowId: windowsData[activeIndexTree[0]].id}),
-            })
-          }
-        }}
-        // gets called when the dragged item is over another item
-        // responsible for updating the UI
-        onDragOver={({ active, over }) => {
-
-          if (!over?.id) return
-          if (active.id === over.id) return
-
-          const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
-          const overIndexTree = getIndexTreeFromId(over.id, windowsData)
-
-          // if moved to own parent then do nothing
-          if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
-          if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
-
-          // console.log("dragover", getItemFromId(over.id, windowsData).title)
-          // console.log("move", activeIndexTree, overIndexTree)
-          
-          const tmp = moveItem(windowsData, activeIndexTree, overIndexTree, active.id, windowsData) as WindowItem[]
-          console.log(tmp)
-          setWindowsData(tmp)
-
-        }}
-        onDragCancel={({ active }) => {
-          console.log("drag cancel:", active)
-          document.getElementById("main")?.classList.remove("dragging")
-          if (backupWindowsData) {
-            setWindowsData(backupWindowsData)
-          }
-          setDraggedId(null)
-          setBackupWindowsData([])
-        }}
-      >
-        {windowsData.map(windowData => (!windowData.incognito || settings.showIncognitoWindows) && (
-          <Window
-            key={windowData.id}
-            window={windowData}
-            // className={clsx("window", windowData.focused ? "focused" : "")}
-            focusedTabs={[]} // just a placeholder
-          />
-        ))}
-      </DndContext>
+            setDraggedId(null)
+            setBackupWindowsData([])
+          }}
+        >
+          {windowsData.map(windowData => (!windowData.incognito || settings.showIncognitoWindows) && (
+            <Window
+              key={windowData.id}
+              window={windowData}
+              // className={clsx("window", windowData.focused ? "focused" : "")}
+              focusedTabs={[]} // just a placeholder
+            />
+          ))}
+        </DndContext>
+      </div>
     </div>
   );
 }

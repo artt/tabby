@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils"
-import { GroupItem, TabItem } from "@/types"
-import { useSortable } from "@dnd-kit/sortable"
+import { GroupItem, TabItem, TreeItem } from "@/types"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from '@dnd-kit/utilities';
 import React from "react";
 
@@ -41,7 +41,7 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
   return (
     <div
       ref={setNodeRef}
-      className="tab-group my-2 overflow-x-hidden"
+      className="tab-group relative my-2 overflow-x-hidden"
       style={{
         ...style,
         "--color": `var(--${tabGroup.color})`,
@@ -54,7 +54,7 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
       <div className="tab-group-title flex items-center px-[--left-space] bg-[--color] font-bold text-background">
         <div>{tabGroup.title || "​"}</div>
         <div
-          className="close-button ml-auto cursor-pointer font-bold hidden opacity-30"
+          className="close-button ml-auto font-bold hidden opacity-30"
           onClick={e => handleCloseGroup(e, tabGroup)}
         >
           ✕
@@ -66,15 +66,20 @@ export const TabGroup = ({tabGroup, className="", focusedTabs}: TabGroupProps) =
           transition: "height 0.2s",
         }}
       >
-        {tabGroup.children.map((item: TabItem) => (
-          <Tab
-            key={item.id}
-            tab={item}
-            className={cn(
-              focusedTabs.includes(item.id!) ? "focused" : ""
-            )}
-          />
-        ))}
+        <SortableContext
+          items={tabGroup.children.map((item: TreeItem) => item.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {tabGroup.children.map((item: TabItem) => (
+            <Tab
+              key={item.id}
+              tab={item}
+              className={cn(
+                focusedTabs.includes(item.id!) ? "focused" : ""
+              )}
+            />
+          ))}
+        </SortableContext>
       </div>
     </div>
   )

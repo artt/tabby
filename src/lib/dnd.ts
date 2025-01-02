@@ -1,5 +1,5 @@
 import { GroupItem, TreeItem, WindowItem } from "@/types";
-import { UniqueIdentifier } from "@dnd-kit/core";
+import { Active, Over, UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
 // return the object of found ID, which could be a child of a child
@@ -173,4 +173,64 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
     }
     return newTree
   }
+}
+
+export const onDragEnd = (active: Active, over: Over | null, windowsData: WindowItem[]) => {
+  // console.log("drag end:", active, over)
+  document.getElementById("main")?.classList.remove("dragging")
+  if (!over?.id) return
+  const activeItem = getItemFromId(active.id, windowsData)
+  if (activeItem.kind === "window") return
+  const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
+  if (activeItem.kind === "tab") {
+    const newIndex = getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData)
+    let newGroup = -1
+    if (activeIndexTree.length === 3) {
+      console.log("activeIndexTree has length 3")
+      // need to move into the group of the next tab
+      // if the position in the group is 0, then need to look at the index of the next tab over
+      newGroup = windowsData[activeIndexTree[0]].tabs![newIndex + (activeIndexTree[2] === 0 ? 1 : 0)].groupId
+    }
+    console.log("newGroup", newGroup)
+    chrome.tabs.move(active.id as number, {
+      index: getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData),
+      windowId: windowsData[activeIndexTree[0]].id,
+    })
+    if (newGroup === -1) {
+      chrome.tabs.ungroup(active.id as number)
+    }
+    else {
+      chrome.tabs.group({ tabIds: active.id as number, groupId: newGroup })
+    }
+  }
+  else if (activeItem.kind === "tabGroup") {
+    const currentWindowId = (activeItem as GroupItem).windowId
+    const newWindowId = windowsData[activeIndexTree[0]].id
+    chrome.tabGroups.move(active.id as number, {
+      index: getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData),
+      // for some reason if the windowId is the same then there'd be error // TODO: report this?
+      ...(currentWindowId !== newWindowId && {windowId: windowsData[activeIndexTree[0]].id}),
+    })
+  }
+}
+
+export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
+
+  if (!over?.id) return
+  if (active.id === over.id) return
+
+  const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
+  const overIndexTree = getIndexTreeFromId(over.id, windowsData)
+
+  // if moved to own parent then do nothing
+  if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
+  if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+
+  // console.log("dragover", getItemFromId(over.id, windowsData).title)
+  // console.log("move", activeIndexTree, overIndexTree)
+  
+  const tmp = moveItem(windowsData, activeIndexTree, overIndexTree, active.id, windowsData) as WindowItem[]
+  console.log(tmp)
+  setWindowsData(tmp)
+
 }
