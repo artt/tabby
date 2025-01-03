@@ -3,7 +3,7 @@ import { Active, Over, UniqueIdentifier } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 
 // return the object of found ID, which could be a child of a child
-export function getItemFromId(id: UniqueIdentifier, windowsData: WindowItem[]): TreeItem {
+export function getItemFromId(id: UniqueIdentifier, tree: TreeItem[]): TreeItem {
   let foundItem: TreeItem | null = null;
   function findItem(item: TreeItem) {
     if (item.id === id) {
@@ -13,7 +13,7 @@ export function getItemFromId(id: UniqueIdentifier, windowsData: WindowItem[]): 
       item.children.forEach(child => findItem(child));
     }
   }
-  windowsData.forEach(item => findItem(item));
+  tree.forEach(item => findItem(item));
   if (foundItem == null) {
     throw new Error(`Could not find item with ID ${id}`);
   }
@@ -115,12 +115,20 @@ function addItem(currentTree: TreeItem[], indexTree: number[], item: TreeItem) {
   }
 }
 
-export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[], activeId: UniqueIdentifier, overId: UniqueIdentifier, windowsData: WindowItem[]) {
+export function moveItem(
+  currentTree: TreeItem[],
+  activeId: UniqueIdentifier,
+  overId: UniqueIdentifier,
+) {
+
+  const activeIndexTree = getIndexTreeFromId(activeId, currentTree)
+  const overIndexTree = getIndexTreeFromId(overId, currentTree)
+
   if (activeIndexTree[0] === overIndexTree[0]) {
     const newTree: TreeItem[] = []
     for (let i = 0; i < currentTree.length; i ++) {
       if (i === activeIndexTree[0]) {
-        const newChildren = moveItem(currentTree[i].children, activeIndexTree.slice(1), overIndexTree.slice(1), activeId, overId, windowsData)
+        const newChildren = moveItem(currentTree[i].children, activeId, overId)
         newTree.push({
           ...currentTree[i],
           children: newChildren
@@ -146,8 +154,8 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
   // then add the active item to the over item's children
   else {
     // get the active item
-    const activeItem = getItemFromId(activeId, windowsData)
-    const overItem = getItemFromId(overId, windowsData)
+    const activeItem = getItemFromId(activeId, currentTree)
+    const overItem = getItemFromId(overId, currentTree)
     // console.log('yyy', currentTree, activeIndexTree, overIndexTree)
     console.log('---', activeItem.title, overItem.title)
     const newTree: TreeItem[] = []
@@ -195,6 +203,30 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
   }
 }
 
+export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
+
+  if (!over?.id) return
+  if (active.id === over.id) return
+  console.log("drag over", getItemFromId(over.id, windowsData).title)
+
+  const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
+  const overIndexTree = getIndexTreeFromId(over.id, windowsData)
+
+  // if moved to own parent then do nothing
+  // TODO: move this logic into moveItem instead so that the animation is more smooth
+  if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
+  if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+
+  // console.log("dragover", getItemFromId(over.id, windowsData).title)
+  // console.log("move", activeIndexTree, overIndexTree)
+  
+  // console.log('moving item', activeIndexTree, overIndexTree)
+  const tmp = moveItem(windowsData, active.id, over.id) as WindowItem[]
+  setWindowsData(tmp)
+
+}
+
+
 export const onDragEnd = (active: Active, over: Over | null, windowsData: WindowItem[]) => {
   // console.log("drag end:", active, over)
   document.getElementById("main")?.classList.remove("dragging")
@@ -232,28 +264,4 @@ export const onDragEnd = (active: Active, over: Over | null, windowsData: Window
       ...(currentWindowId !== newWindowId && {windowId: windowsData[activeIndexTree[0]].id}),
     })
   }
-}
-
-export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
-
-
-  if (!over?.id) return
-  if (active.id === over.id) return
-  console.log("drag over", getItemFromId(over.id, windowsData).title)
-
-  const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
-  const overIndexTree = getIndexTreeFromId(over.id, windowsData)
-
-  // if moved to own parent then do nothing
-  // TODO: move this logic into moveItem instead so that the animation is more smooth
-  if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
-  if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
-
-  // console.log("dragover", getItemFromId(over.id, windowsData).title)
-  // console.log("move", activeIndexTree, overIndexTree)
-  
-  // console.log('moving item', activeIndexTree, overIndexTree)
-  const tmp = moveItem(windowsData, activeIndexTree, overIndexTree, active.id, over.id, windowsData) as WindowItem[]
-  setWindowsData(tmp)
-
 }
