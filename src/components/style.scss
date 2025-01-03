@@ -56,3 +56,7 @@
     background-color: var(--color-tab-focused);
   }
 }
+
+*:focus {
+  outline: none;
+}

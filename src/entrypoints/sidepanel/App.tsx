@@ -88,9 +88,9 @@ function App() {
   }, [])
 
   return (
-    <div>
+    <div className="flex flex-col h-screen">
       <Top />
-      <div id="main" className="">
+      <div id="main" className="overflow-y-auto flex-grow">
         <DndContext
           sensors={sensors}
           autoScroll={false}
