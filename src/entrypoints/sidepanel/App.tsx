@@ -1,15 +1,15 @@
 import React from 'react';
+import { DndContext, UniqueIdentifier, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+
+import { WindowItem } from '@/types';
 import { addWindowsAndTabsListeners, addMediaQueryListener } from '@/lib/listeners';
-import { isTabMatched, processTabGroupItem, processTabItem, processWindowItem } from '@/lib/process'
-import { Input } from "@/components/ui/input"
-import { GroupItem, TreeItem, WindowItem } from '@/types';
-import { getIndexTreeFromId, getItemFromId, getWindowsTabIndexFromIndexTree, moveItem, onDragEnd, onDragOver } from '@/lib/dnd';
+import { processTabGroupItem, processTabItem, processWindowItem } from '@/lib/process'
+import { onDragEnd, onDragOver } from '@/lib/dnd';
+
 import { Window } from '@/components/Window';
-import {DndContext, UniqueIdentifier} from '@dnd-kit/core';
+import TopBar from '@/components/TopBar';
+
 import '@/components/style.scss'
-import { PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { arrayMove } from '@dnd-kit/sortable';
-import Top from '@/components/Top';
 
 function App() {
 
@@ -89,7 +89,7 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Top />
+      <TopBar />
       <div id="main" className="overflow-y-auto flex-grow">
         <DndContext
           sensors={sensors}

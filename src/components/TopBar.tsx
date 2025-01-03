@@ -1,4 +1,3 @@
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +8,9 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "./ui/button";
 import { Menu } from "lucide-react";
+import { deduplicate, sort, ungroup } from "@/lib/browserOperations";
 
-export default function Top() {
+export default function TopBar() {
   return (
     <div className="flex h-[--controls-height] px-1 py-2 items-center">
       <div className="flex-grow">ccc</div>
@@ -21,7 +21,8 @@ export default function Top() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => console.log('xxx')}>Remove duplicate tabs</DropdownMenuItem>
+          <DropdownMenuItem onClick={deduplicate}>Remove duplicate tabs</DropdownMenuItem>
+          <DropdownMenuItem onClick={sort}>Sort tabs</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>Settings</DropdownMenuItem>
         </DropdownMenuContent>
