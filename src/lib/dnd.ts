@@ -140,7 +140,10 @@ function moveItem(
     }
     return newTree
   }
-  else if ((activeIndexTree.length === 1 && overIndexTree.length === 1) && (currentTree[overIndexTree[0]].kind != 'tabGroup')) {
+  else if (
+    (activeIndexTree.length === 1 && overIndexTree.length === 1)
+    // * && (currentTree[overIndexTree[0]].kind != 'tabGroup')
+  ) {
 
     // console.log('xxx', currentTree, activeIndexTree, overIndexTree)
     // if (currentTree[overIndexTree[0]].kind === "tabGroup") {
@@ -244,7 +247,7 @@ function syncChromeTabs(active: Active, over: Over, windowsData: WindowItem[]) {
   }
 
   const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
-
+  
   if (activeItem.kind === "tab") {
     const newIndex = getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData)
     let newGroup = -1
