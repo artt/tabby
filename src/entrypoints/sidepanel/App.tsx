@@ -11,7 +11,17 @@ import TopBar from '@/components/TopBar';
 
 import '@/components/style.scss'
 
+export type Settings = {
+  showIncognitoWindows: boolean,
+  apiKey: string,
+}
+
 function App() {
+
+  const defaultSettings = {
+    showIncognitoWindows: false,
+    apiKey: "",
+  }
 
   const [rawWindows, setRawWindows] = React.useState<chrome.windows.Window[]>([])
   const [rawTabGroups, setRawTabGroups] = React.useState<chrome.tabGroups.TabGroup[]>([])
@@ -19,10 +29,19 @@ function App() {
   // backup windows data in case the drag is cancelled so we can restore the original order
   const [backupWindowsData, setBackupWindowsData] = React.useState<WindowItem[]>([])
   const [draggedId, setDraggedId] = React.useState<UniqueIdentifier | null>(null);
-  
-  const settings = {
-    showIncognitoWindows: false,
-  }
+  // set default to localsoage settings; otherwise apply defaultSettings
+  const [settings, setSettings] = React.useState(() => {
+    const settings = localStorage.getItem("settings")
+    if (settings) {
+      return JSON.parse(settings)
+    }
+    return defaultSettings
+  })
+
+  // save settings to localstorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem("settings", JSON.stringify(settings))
+  }, [settings])
 
   // const { sensors } = useDndKit()
   const sensors = useSensors(
@@ -89,7 +108,7 @@ function App() {
 
   return (
     <div className="flex flex-col h-screen">
-      <TopBar />
+      <TopBar settings={settings} setSettings={setSettings} />
       <div id="main" className="overflow-y-auto flex-grow">
         <DndContext
           sensors={sensors}
