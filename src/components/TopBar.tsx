@@ -45,16 +45,12 @@ export default function TopBar({ settings, setSettings }: { settings: Settings, 
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={deduplicate}>Remove duplicate tabs</DropdownMenuItem>
           <DropdownMenuItem onClick={sort}>Sort tabs</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setSettingsOpen(true)}>Settings</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Sheet>
-        <SheetTrigger>
-          <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-            <SettingsIcon />
-          </Button>
-        </SheetTrigger>
+      <Button onClick={() => setSettingsOpen(true)} variant="ghost" size="icon" className="rounded-full h-7 w-7">
+        <SettingsIcon />
+      </Button>
+      <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
         <SheetContent side="top">
           <SheetHeader>
             <SheetTitle>Settings</SheetTitle>

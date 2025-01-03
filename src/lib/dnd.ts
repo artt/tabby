@@ -115,12 +115,12 @@ function addItem(currentTree: TreeItem[], indexTree: number[], item: TreeItem) {
   }
 }
 
-export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[], activeId: UniqueIdentifier, windowsData: WindowItem[]) {
+export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], overIndexTree: number[], activeId: UniqueIdentifier, overId: UniqueIdentifier, windowsData: WindowItem[]) {
   if (activeIndexTree[0] === overIndexTree[0]) {
     const newTree: TreeItem[] = []
     for (let i = 0; i < currentTree.length; i ++) {
       if (i === activeIndexTree[0]) {
-        const newChildren = moveItem(currentTree[i].children, activeIndexTree.slice(1), overIndexTree.slice(1), activeId, windowsData)
+        const newChildren = moveItem(currentTree[i].children, activeIndexTree.slice(1), overIndexTree.slice(1), activeId, overId, windowsData)
         newTree.push({
           ...currentTree[i],
           children: newChildren
@@ -132,7 +132,12 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
     }
     return newTree
   }
-  else if (activeIndexTree.length === 1 && overIndexTree.length === 1) {
+  else if ((activeIndexTree.length === 1 && overIndexTree.length === 1) && (currentTree[overIndexTree[0]].kind != 'tabGroup')) {
+
+    // console.log('xxx', currentTree, activeIndexTree, overIndexTree)
+    // if (currentTree[overIndexTree[0]].kind === "tabGroup") {
+    //   // add the item to the tab group
+    // }
     // console.log("one item left")
     return arrayMove(currentTree, activeIndexTree[0], overIndexTree[0])
   }
@@ -142,6 +147,9 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
   else {
     // get the active item
     const activeItem = getItemFromId(activeId, windowsData)
+    const overItem = getItemFromId(overId, windowsData)
+    // console.log('yyy', currentTree, activeIndexTree, overIndexTree)
+    console.log('---', activeItem.title, overItem.title)
     const newTree: TreeItem[] = []
     for (let i = 0; i < currentTree.length; i ++) {
       if (i === activeIndexTree[0]) {
@@ -156,8 +164,19 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
       }
       else if (i === overIndexTree[0]) {
         if (overIndexTree.length === 1) {
-          newTree.push(activeItem)
-          newTree.push(currentTree[i])
+          // check if overItem is a tabGroup
+          // if it is, then add the activeItem to that tabGroup
+          if (overItem.kind === "tabGroup") {
+            const newChildren = addItem((overItem as GroupItem).children, [0], activeItem)
+            newTree.push({
+              ...overItem,
+              children: newChildren
+            })
+          }
+          else {
+            newTree.push(activeItem)
+            newTree.push(currentTree[i])
+          }
         }
         else {
           const newChildren = addItem(currentTree[i].children, overIndexTree.slice(1), activeItem)
@@ -171,6 +190,7 @@ export function moveItem(currentTree: TreeItem[], activeIndexTree: number[], ove
         newTree.push(currentTree[i])
       }
     }
+    console.log(newTree)
     return newTree
   }
 }
@@ -216,21 +236,24 @@ export const onDragEnd = (active: Active, over: Over | null, windowsData: Window
 
 export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
 
+
   if (!over?.id) return
   if (active.id === over.id) return
+  console.log("drag over", getItemFromId(over.id, windowsData).title)
 
   const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
   const overIndexTree = getIndexTreeFromId(over.id, windowsData)
 
   // if moved to own parent then do nothing
+  // TODO: move this logic into moveItem instead so that the animation is more smooth
   if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
   if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
 
   // console.log("dragover", getItemFromId(over.id, windowsData).title)
   // console.log("move", activeIndexTree, overIndexTree)
   
-  const tmp = moveItem(windowsData, activeIndexTree, overIndexTree, active.id, windowsData) as WindowItem[]
-  console.log(tmp)
+  // console.log('moving item', activeIndexTree, overIndexTree)
+  const tmp = moveItem(windowsData, activeIndexTree, overIndexTree, active.id, over.id, windowsData) as WindowItem[]
   setWindowsData(tmp)
 
 }

@@ -39,10 +39,6 @@ export const Tab = ({tab, className=""}: TabProps) => {
     chrome.tabs.remove(tab.id!)
   }
 
-  React.useEffect(() => {
-    console.log('dragging', isDragging)
-  }, [isDragging])
-
   return (
     <div
       ref={setNodeRef}
