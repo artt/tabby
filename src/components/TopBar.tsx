@@ -21,6 +21,8 @@ export default function TopBar() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
+          <DropdownMenuItem onClick={ungroup}>Ungroup tabs</DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={deduplicate}>Remove duplicate tabs</DropdownMenuItem>
           <DropdownMenuItem onClick={sort}>Sort tabs</DropdownMenuItem>
           <DropdownMenuSeparator />
