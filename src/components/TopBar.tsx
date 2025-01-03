@@ -27,15 +27,13 @@ import { Settings } from "@/entrypoints/sidepanel/App";
 
 export default function TopBar({ settings, setSettings }: { settings: Settings, setSettings: (settings: Settings) => void }) {
 
-  const [settingsOpen, setSettingsOpen] = React.useState(false)
-
   return (
     <div className="flex h-[--controls-height] px-1 py-2 items-center">
       <div className="flex-grow">
         ccc
       </div>
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
             <Menu />
           </Button>
@@ -47,10 +45,12 @@ export default function TopBar({ settings, setSettings }: { settings: Settings, 
           <DropdownMenuItem onClick={sort}>Sort tabs</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button onClick={() => setSettingsOpen(true)} variant="ghost" size="icon" className="rounded-full h-7 w-7">
-        <SettingsIcon />
-      </Button>
-      <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
+            <SettingsIcon />
+          </Button>
+        </SheetTrigger>
         <SheetContent side="top">
           <SheetHeader>
             <SheetTitle>Settings</SheetTitle>

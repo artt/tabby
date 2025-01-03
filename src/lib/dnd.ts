@@ -157,7 +157,7 @@ function moveItem(
     const activeItem = getItemFromId(activeId, currentTree)
     const overItem = getItemFromId(overId, currentTree)
     // console.log('yyy', currentTree, activeIndexTree, overIndexTree)
-    console.log('---', activeItem.title, overItem.title)
+    // console.log('---', activeItem.title, overItem.title)
     const newTree: TreeItem[] = []
     for (let i = 0; i < currentTree.length; i ++) {
       if (i === activeIndexTree[0]) {
@@ -198,33 +198,39 @@ function moveItem(
         newTree.push(currentTree[i])
       }
     }
-    console.log(newTree)
+    // console.log(newTree)
     return newTree
   }
 }
 
-// export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
+// deal only with cases when the active item has changed parents
+// otherwise the whole thing is dealt with in onDragEnd
+export const onDragOver = (active: Active, over: Over, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
 
-//   if (!over?.id) return
-//   if (active.id === over.id) return
-//   console.log("drag over", getItemFromId(over.id, windowsData).title)
+  if (active.id === over.id) {
+    // TODO: consider remove this... not sure if needed
+    console.error("This should not happen")
+    return
+  }
 
-//   const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
-//   const overIndexTree = getIndexTreeFromId(over.id, windowsData)
+  console.log("drag over", getItemFromId(over.id, windowsData).title)
 
-//   // if moved to own parent then do nothing
-//   // TODO: move this logic into moveItem instead so that the animation is more smooth
-//   if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
-//   if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+  const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
+  const overIndexTree = getIndexTreeFromId(over.id, windowsData)
 
-//   // console.log("dragover", getItemFromId(over.id, windowsData).title)
-//   // console.log("move", activeIndexTree, overIndexTree)
+  // if moved to own parent then do nothing
+  // TODO: move this logic into moveItem instead so that the animation is more smooth
+  if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
+  if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+
+  // console.log("dragover", getItemFromId(over.id, windowsData).title)
+  // console.log("move", activeIndexTree, overIndexTree)
   
-//   // console.log('moving item', activeIndexTree, overIndexTree)
-//   const tmp = moveItem(windowsData, active.id, over.id) as WindowItem[]
-//   // setWindowsData(tmp)
+  // console.log('moving item', activeIndexTree, overIndexTree)
+  const tmp = moveItem(windowsData, active.id, over.id) as WindowItem[]
+  // setWindowsData(tmp)
 
-// }
+}
 
 function syncChromeTabs(active: Active, over: Over, windowsData: WindowItem[]) {
 
@@ -273,11 +279,9 @@ function syncChromeTabs(active: Active, over: Over, windowsData: WindowItem[]) {
 
 }
 
-export const onDragEnd = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
+export const onDragEnd = (active: Active, over: Over, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
 
   document.getElementById("main")?.classList.remove("dragging")
-
-  if (!over?.id) return
 
   const newWindowsData = moveItem(windowsData, active.id, over.id) as WindowItem[]
   setWindowsData(newWindowsData)
