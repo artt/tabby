@@ -4,7 +4,7 @@ import { DndContext, UniqueIdentifier, PointerSensor, useSensor, useSensors } fr
 import { WindowItem } from '@/types';
 import { addWindowsAndTabsListeners, addMediaQueryListener } from '@/lib/listeners';
 import { processTabGroupItem, processTabItem, processWindowItem } from '@/lib/process'
-import { onDragEnd, onDragOver } from '@/lib/dnd';
+import { onDragEnd } from '@/lib/dnd';
 
 import { Window } from '@/components/Window';
 import TopBar from '@/components/TopBar';
@@ -119,10 +119,10 @@ function App() {
             setBackupWindowsData(windowsData)
           }}
           // when everything is said and done, sync changes to the browser
-          onDragEnd={({ active, over }) => onDragEnd(active, over, windowsData)}
+          onDragEnd={({ active, over }) => onDragEnd(active, over, windowsData, setWindowsData)}
           // gets called when the dragged item is over another item
           // responsible for updating the UI
-          onDragOver={({ active, over }) => onDragOver(active, over, windowsData, setWindowsData)}
+          // * onDragOver={({ active, over }) => onDragOver(active, over, windowsData, setWindowsData)}
           // gets called when the drag is cancelled
           // we just restore the original order
           onDragCancel={({ active }) => {

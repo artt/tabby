@@ -115,7 +115,7 @@ function addItem(currentTree: TreeItem[], indexTree: number[], item: TreeItem) {
   }
 }
 
-export function moveItem(
+function moveItem(
   currentTree: TreeItem[],
   activeId: UniqueIdentifier,
   overId: UniqueIdentifier,
@@ -203,37 +203,42 @@ export function moveItem(
   }
 }
 
-export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
+// export const onDragOver = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
 
-  if (!over?.id) return
-  if (active.id === over.id) return
-  console.log("drag over", getItemFromId(over.id, windowsData).title)
+//   if (!over?.id) return
+//   if (active.id === over.id) return
+//   console.log("drag over", getItemFromId(over.id, windowsData).title)
 
-  const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
-  const overIndexTree = getIndexTreeFromId(over.id, windowsData)
+//   const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
+//   const overIndexTree = getIndexTreeFromId(over.id, windowsData)
 
-  // if moved to own parent then do nothing
-  // TODO: move this logic into moveItem instead so that the animation is more smooth
-  if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
-  if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+//   // if moved to own parent then do nothing
+//   // TODO: move this logic into moveItem instead so that the animation is more smooth
+//   if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
+//   if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
 
-  // console.log("dragover", getItemFromId(over.id, windowsData).title)
-  // console.log("move", activeIndexTree, overIndexTree)
+//   // console.log("dragover", getItemFromId(over.id, windowsData).title)
+//   // console.log("move", activeIndexTree, overIndexTree)
   
-  // console.log('moving item', activeIndexTree, overIndexTree)
-  const tmp = moveItem(windowsData, active.id, over.id) as WindowItem[]
-  setWindowsData(tmp)
+//   // console.log('moving item', activeIndexTree, overIndexTree)
+//   const tmp = moveItem(windowsData, active.id, over.id) as WindowItem[]
+//   // setWindowsData(tmp)
 
-}
+// }
 
+function syncChromeTabs(active: Active, over: Over, windowsData: WindowItem[]) {
 
-export const onDragEnd = (active: Active, over: Over | null, windowsData: WindowItem[]) => {
-  // console.log("drag end:", active, over)
-  document.getElementById("main")?.classList.remove("dragging")
-  if (!over?.id) return
   const activeItem = getItemFromId(active.id, windowsData)
-  if (activeItem.kind === "window") return
+
+  // we don't allow moving windows
+  if (activeItem.kind === "window") {
+    // TODO: consider remove this... not sure if needed
+    console.error('We actually need to check this!?!')
+    return
+  }
+
   const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
+
   if (activeItem.kind === "tab") {
     const newIndex = getWindowsTabIndexFromIndexTree(activeIndexTree, windowsData)
     let newGroup = -1
@@ -255,6 +260,7 @@ export const onDragEnd = (active: Active, over: Over | null, windowsData: Window
       chrome.tabs.group({ tabIds: active.id as number, groupId: newGroup })
     }
   }
+  
   else if (activeItem.kind === "tabGroup") {
     const currentWindowId = (activeItem as GroupItem).windowId
     const newWindowId = windowsData[activeIndexTree[0]].id
@@ -264,4 +270,17 @@ export const onDragEnd = (active: Active, over: Over | null, windowsData: Window
       ...(currentWindowId !== newWindowId && {windowId: windowsData[activeIndexTree[0]].id}),
     })
   }
+
+}
+
+export const onDragEnd = (active: Active, over: Over | null, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
+
+  document.getElementById("main")?.classList.remove("dragging")
+
+  if (!over?.id) return
+
+  const newWindowsData = moveItem(windowsData, active.id, over.id) as WindowItem[]
+  setWindowsData(newWindowsData)
+  syncChromeTabs(active, over, newWindowsData)
+
 }
