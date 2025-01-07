@@ -122,7 +122,7 @@ function App() {
           onDragEnd={({ active, over }) => over && onDragEnd(active, over, windowsData, setWindowsData)}
           // gets called when the dragged item is over another item
           // responsible for updating the UI
-          // onDragOver={({ active, over }) => over && onDragOver(active, over, windowsData, setWindowsData)}
+          onDragOver={({ active, over }) => over && onDragOver(active, over, windowsData, setWindowsData)}
           // gets called when the drag is cancelled
           // we just restore the original order
           onDragCancel={({ active }) => {

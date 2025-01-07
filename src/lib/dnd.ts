@@ -210,13 +210,12 @@ function moveItem(
 // otherwise the whole thing is dealt with in onDragEnd
 export const onDragOver = (active: Active, over: Over, windowsData: WindowItem[], setWindowsData: (data: WindowItem[]) => void) => {
 
-  if (active.id === over.id) {
-    // TODO: consider remove this... not sure if needed
-    console.error("This should not happen")
-    return
-  }
-
-  console.log("drag over", getItemFromId(over.id, windowsData).title)
+  // if (active.id === over.id) {
+  //   // TODO: consider remove this... not sure if needed
+  //   console.error("This should not happen")
+  //   console.log(getItemFromId(active.id, windowsData))
+  //   return
+  // }
 
   const activeIndexTree = getIndexTreeFromId(active.id, windowsData)
   const overIndexTree = getIndexTreeFromId(over.id, windowsData)
@@ -225,13 +224,15 @@ export const onDragOver = (active: Active, over: Over, windowsData: WindowItem[]
   // TODO: move this logic into moveItem instead so that the animation is more smooth
   if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.join(",")) return
   if (activeIndexTree.join(",") === overIndexTree.slice(0, -1).join(",")) return
+  if (activeIndexTree.slice(0, -1).join(",") === overIndexTree.slice(0, -1).join(",")) return
 
   // console.log("dragover", getItemFromId(over.id, windowsData).title)
   // console.log("move", activeIndexTree, overIndexTree)
   
   // console.log('moving item', activeIndexTree, overIndexTree)
+  console.log('xxxx')
   const tmp = moveItem(windowsData, active.id, over.id) as WindowItem[]
-  // setWindowsData(tmp)
+  setWindowsData(tmp)
 
 }
 

@@ -6,24 +6,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
 import { Button } from "./ui/button";
-import { Menu, Settings as SettingsIcon } from "lucide-react";
+import { Menu } from "lucide-react";
 import { deduplicate, sort, ungroup } from "@/lib/browserOperations";
-import React from "react";
-import { PasswordInput } from "./ui/password-input";
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Settings } from "@/entrypoints/sidepanel/App";
+import { type Settings } from "@/entrypoints/sidepanel/App";
+import SettingsPage from "./SettingsPage";
 
 export default function TopBar({ settings, setSettings }: { settings: Settings, setSettings: (settings: Settings) => void }) {
 
@@ -45,28 +32,7 @@ export default function TopBar({ settings, setSettings }: { settings: Settings, 
           <DropdownMenuItem onClick={sort}>Sort tabs</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-            <SettingsIcon />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="top">
-          <SheetHeader>
-            <SheetTitle>Settings</SheetTitle>
-          </SheetHeader>
-          <div className="mt-8 flex flex-col gap-4">
-            <div className="flex items-center">
-              <Label>Show incognito windows</Label>
-              <Switch
-                className="ml-auto"
-                checked={settings.showIncognitoWindows}
-                onCheckedChange={(checked) => setSettings({ ...settings, showIncognitoWindows: checked })}
-              />
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+      <SettingsPage settings={settings} setSettings={setSettings} />
     </div>
   )
 
