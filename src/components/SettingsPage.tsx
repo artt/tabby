@@ -1,23 +1,18 @@
-import { Check, Settings as SettingsIcon } from "lucide-react";
+import { Check } from "lucide-react";
 import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "./ui/sheet";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Switch } from "./ui/switch";
 import { type Settings } from "@/entrypoints/sidepanel/App";
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 
-export default function SettingsPage({ settings, setSettings }: { settings: Settings, setSettings: (settings: Settings) => void }) {
+export default function SettingsPage({ settingPageOpen, setSettingsPageOpen, settings, setSettings }: { settingPageOpen: boolean, setSettingsPageOpen: Dispatch<SetStateAction<boolean>>, settings: Settings, setSettings: (settings: Settings) => void }) {
 
   const [apiKey, setApiKey] = React.useState(settings.apiKey)
 
   return(
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full h-7 w-7">
-          <SettingsIcon />
-        </Button>
-      </SheetTrigger>
+    <Sheet open={settingPageOpen} onOpenChange={setSettingsPageOpen}>
       <SheetContent side="top">
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>

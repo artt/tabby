@@ -1,3 +1,58 @@
+import { processTabsForOpenAi } from "./utils"
+import OpenAI from "openai"
+
+export async function group(apiKey: string) {
+  console.log("Grouping current window...")
+  const window = await chrome.windows.getCurrent({populate: true})
+  console.log(window)
+  const allTabs = processTabsForOpenAi(window.tabs!)
+  const tabIds = window.tabs!.map(tab => tab.id!)
+
+  const openai = new OpenAI({
+    apiKey: apiKey, // import.meta.env.VITE_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true,
+  })
+  console.log("allTabs:", allTabs)
+  console.log("tabIds:", tabIds)
+  console.log("Making call to OpenAI...")
+  const res = await openai.chat.completions.create({
+    // model: "gpt-3.5-turbo-1106",
+    // model: "gpt-4-0125-preview",
+    model: "gpt-4o",
+    response_format: { "type": "json_object" },
+    messages: [
+      {
+        role: "system",
+        content: [
+          `You help people manage their tabs by grouping the tabs by their topics.`,
+          `You will be provided with an array of object: {id, title, url} which contains the tab's ID, title, and domain/subdomain.`,
+          `The URL field could be empty.`,
+          `Please group them into logical groups based on titles and domain/subdomains.`,
+          `The output should be a JSON object with a single key, "groups".`,
+          `The value of that key is an array of objects with keys "title" which specifies the tab group's name, and "tabIds" which is an array of tab's IDs in each group.`,
+          `Items that don't belong to any group should be in its own group named "Others".`,
+          `Make sure each tab is assigned to exactly one group.`,
+        ].join(' '),
+      },
+      {
+        role: "user",
+        content: JSON.stringify(allTabs),
+      }
+    ]
+  })
+  const newGroups = JSON.parse(res.choices[0].message.content || `{"groups": []}`)["groups"]
+  console.log("Get new grouping", newGroups)
+  // move the tabs accordingly
+  // TODO: as of now, tabs that already have groups that are determined to not have any groups are not moved
+  for (const group of newGroups) {
+    console.log(`Moving tabs for group "${group.title}"`)
+    const tabIdsInGroup = group.tabIds.map((tabId: number) => tabIds[tabId] || (-1 * tabId)).filter((tabId: number) => tabId > 0)
+    console.log(tabIdsInGroup)
+    const groupId = await chrome.tabs.group({ tabIds: tabIdsInGroup })
+    chrome.tabGroups.update(groupId, { title: group.title })
+  }
+}
+
 export async function ungroup() {
   const window = await chrome.windows.getCurrent({populate: true})
   chrome.tabs.ungroup(window.tabs!.map(tab => tab.id!))
