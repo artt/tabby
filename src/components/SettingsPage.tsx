@@ -17,7 +17,7 @@ export default function SettingsPage({ settingPageOpen, setSettingsPageOpen, set
         <SheetHeader>
           <SheetTitle>Settings</SheetTitle>
         </SheetHeader>
-        <div className="mt-8 flex flex-col gap-4">
+        <div className="mt-4 flex flex-col gap-4">
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Label htmlFor="email">OpenAI API key</Label>
             <div className="flex items-center gap-2">
